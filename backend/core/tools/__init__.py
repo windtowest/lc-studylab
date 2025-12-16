@@ -8,7 +8,7 @@
 
 from .time_tools import get_current_time, get_current_date
 from .calculator import calculator
-from .web_search import web_search, web_search_simple, create_tavily_search_tool
+from .web_search import zhipu_web_search
 from .weather import get_weather, get_weather_forecast, get_daily_weather
 
 # ==================== 工具集合 ====================
@@ -22,8 +22,7 @@ BASIC_TOOLS = [
 
 # 需要外部 API 的工具做细分，便于在不同场景组合
 WEB_SEARCH_TOOLS = [
-    web_search,
-    web_search_simple,
+    zhipu_web_search
 ]
 
 WEATHER_TOOLS = [

@@ -30,6 +30,8 @@ RAG CLI 工具
 import sys
 from pathlib import Path
 
+import langchain
+
 # 确保项目根目录在 Python 路径中
 backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:
@@ -91,12 +93,12 @@ def create_index(name, directory, description, chunk_size, chunk_overlap, overwr
     DIRECTORY: 文档目录路径
     """
     try:
-        console.print(f"\n[bold blue]📝 创建索引: {name}[/bold blue]\n")
+        console.print(f"\n[bold blue]创建索引: {name}[/bold blue]\n")
         
         # 检查目录
         directory_path = Path(directory)
         if not directory_path.exists():
-            console.print(f"[red]❌ 目录不存在: {directory}[/red]")
+            console.print(f"[red]目录不存在: {directory}[/red]")
             sys.exit(1)
         
         # 创建索引管理器
@@ -104,7 +106,7 @@ def create_index(name, directory, description, chunk_size, chunk_overlap, overwr
         
         # 检查索引是否已存在
         if manager.index_exists(name) and not overwrite:
-            console.print(f"[red]❌ 索引已存在: {name}[/red]")
+            console.print(f"[red]索引已存在: {name}[/red]")
             console.print("[yellow]提示: 使用 --overwrite 来覆盖[/yellow]")
             sys.exit(1)
         
@@ -114,30 +116,30 @@ def create_index(name, directory, description, chunk_size, chunk_overlap, overwr
             console=console,
         ) as progress:
             # 加载文档
-            task = progress.add_task("📂 加载文档...", total=None)
+            # task1 = progress.add_task("加载文档...", total=None)
             documents = load_directory(str(directory_path), show_progress=False)
-            progress.update(task, description=f"✅ 加载了 {len(documents)} 个文档")
+            # progress.update(task1, description=f"加载了 {len(documents)} 个文档")
             
             if not documents:
-                console.print("[red]❌ 没有找到支持的文档[/red]")
+                console.print("[red]没有找到支持的文档[/red]")
                 sys.exit(1)
             
             # 分块
-            task = progress.add_task("✂️  分块文档...", total=None)
+            # task2 = progress.add_task("分块文档...", total=None)
             chunks = split_documents(
                 documents,
                 chunk_size=chunk_size,
                 chunk_overlap=chunk_overlap,
             )
-            progress.update(task, description=f"✅ 生成了 {len(chunks)} 个文本块")
+            # progress.update(task2, description=f"生成了 {len(chunks)} 个文本块")
             
             # 创建 embeddings
-            task = progress.add_task("🔢 创建 embeddings...", total=None)
+            # task3 = progress.add_task("创建 embeddings...", total=None)
             embeddings = get_embeddings()
-            progress.update(task, description="✅ Embeddings 准备完成")
-            
+            # progress.update(task3, description="Embeddings 准备完成")
+
             # 创建索引
-            task = progress.add_task("🗄️  创建向量索引...", total=None)
+            # task4 = progress.add_task("创建向量索引...", total=None)
             manager.create_index(
                 name=name,
                 documents=chunks,
@@ -145,9 +147,9 @@ def create_index(name, directory, description, chunk_size, chunk_overlap, overwr
                 description=description,
                 overwrite=overwrite,
             )
-            progress.update(task, description="✅ 索引创建完成")
-        
-        console.print(f"\n[green]✅ 索引创建成功: {name}[/green]\n")
+            # progress.update(task4, description="索引创建完成")
+
+        console.print(f"\n[green]索引创建成功: {name}[/green]\n")
         
         # 显示索引信息
         info = manager.get_index_info(name)
@@ -163,7 +165,7 @@ def create_index(name, directory, description, chunk_size, chunk_overlap, overwr
         console.print(table)
         
     except Exception as e:
-        console.print(f"\n[red]❌ 创建索引失败: {e}[/red]\n")
+        console.print(f"\n[red]创建索引失败: {e}[/red]\n")
         logger.error(f"创建索引失败: {e}", exc_info=True)
         sys.exit(1)
 
@@ -198,7 +200,7 @@ def list_indexes():
         console.print("\n")
         
     except Exception as e:
-        console.print(f"\n[red]❌ 列出索引失败: {e}[/red]\n")
+        console.print(f"\n[red]列出索引失败: {e}[/red]\n")
         sys.exit(1)
 
 
@@ -214,7 +216,7 @@ def show_index_info(name):
         manager = IndexManager()
         
         if not manager.index_exists(name):
-            console.print(f"\n[red]❌ 索引不存在: {name}[/red]\n")
+            console.print(f"\n[red]索引不存在: {name}[/red]\n")
             sys.exit(1)
         
         info = manager.get_index_info(name)
@@ -240,7 +242,7 @@ def show_index_info(name):
         console.print("\n")
         
     except Exception as e:
-        console.print(f"\n[red]❌ 获取索引信息失败: {e}[/red]\n")
+        console.print(f"\n[red] 获取索引信息失败: {e}[/red]\n")
         sys.exit(1)
 
 
@@ -257,14 +259,14 @@ def delete_index(name):
         manager = IndexManager()
         
         if not manager.index_exists(name):
-            console.print(f"\n[red]❌ 索引不存在: {name}[/red]\n")
+            console.print(f"\n[red]索引不存在: {name}[/red]\n")
             sys.exit(1)
         
         manager.delete_index(name)
-        console.print(f"\n[green]✅ 索引已删除: {name}[/green]\n")
+        console.print(f"\n[green]索引已删除: {name}[/green]\n")
         
     except Exception as e:
-        console.print(f"\n[red]❌ 删除索引失败: {e}[/red]\n")
+        console.print(f"\n[red]删除索引失败: {e}[/red]\n")
         sys.exit(1)
 
 
@@ -274,7 +276,7 @@ def delete_index(name):
 @click.argument("index_name")
 @click.argument("query")
 @click.option("--k", type=int, default=4, help="返回文档数量")
-@click.option("--show-sources", is_flag=True, help="显示来源文档")
+@click.option("--show-sources", is_flag=True, default=True, help="显示来源文档")
 def query(index_name, query, k, show_sources):
     """
     RAG 查询
@@ -283,12 +285,12 @@ def query(index_name, query, k, show_sources):
     QUERY: 查询问题
     """
     try:
-        console.print(f"\n[bold blue]🔍 查询: {query}[/bold blue]\n")
+        console.print(f"\n[bold blue]查询: {query}[/bold blue]\n")
         
         # 检查索引
         manager = IndexManager()
         if not manager.index_exists(index_name):
-            console.print(f"[red]❌ 索引不存在: {index_name}[/red]")
+            console.print(f"[red]索引不存在: {index_name}[/red]")
             sys.exit(1)
         
         with Progress(
@@ -297,22 +299,16 @@ def query(index_name, query, k, show_sources):
             console=console,
         ) as progress:
             # 加载索引
-            task = progress.add_task("📂 加载索引...", total=None)
             embeddings = get_embeddings()
             vector_store = manager.load_index(index_name, embeddings)
-            progress.update(task, description="✅ 索引加载完成")
-            
+
             # 创建检索器和 Agent
-            task = progress.add_task("🤖 创建 RAG Agent...", total=None)
             retriever = create_retriever(vector_store, k=k)
             agent = create_rag_agent(retriever, streaming=False)
-            progress.update(task, description="✅ Agent 准备完成")
-            
+
             # 查询
-            task = progress.add_task("💭 生成回答...", total=None)
             result = query_rag_agent(agent, query, return_sources=True)
-            progress.update(task, description="✅ 回答生成完成")
-        
+
         # 显示回答
         console.print("\n")
         console.print(Panel(
@@ -323,14 +319,14 @@ def query(index_name, query, k, show_sources):
         
         # 显示来源
         if show_sources and result.get("sources"):
-            console.print("\n[bold cyan]📚 参考来源:[/bold cyan]")
+            console.print("\n[bold cyan]参考来源:[/bold cyan]")
             for i, source in enumerate(result["sources"], 1):
                 console.print(f"  {i}. {source}")
         
         console.print("\n")
         
     except Exception as e:
-        console.print(f"\n[red]❌ 查询失败: {e}[/red]\n")
+        console.print(f"\n[red]查询失败: {e}[/red]\n")
         logger.error(f"查询失败: {e}", exc_info=True)
         sys.exit(1)
 
@@ -347,12 +343,12 @@ def search(index_name, query, k):
     QUERY: 检索查询
     """
     try:
-        console.print(f"\n[bold blue]🔍 检索: {query}[/bold blue]\n")
+        console.print(f"\n[bold blue]检索: {query}[/bold blue]\n")
         
         # 检查索引
         manager = IndexManager()
         if not manager.index_exists(index_name):
-            console.print(f"[red]❌ 索引不存在: {index_name}[/red]")
+            console.print(f"[red]索引不存在: {index_name}[/red]")
             sys.exit(1)
         
         with Progress(
@@ -361,16 +357,14 @@ def search(index_name, query, k):
             console=console,
         ) as progress:
             # 加载索引
-            task = progress.add_task("📂 加载索引...", total=None)
             embeddings = get_embeddings()
             vector_store = manager.load_index(index_name, embeddings)
-            progress.update(task, description="✅ 索引加载完成")
-            
+
             # 检索
-            task = progress.add_task("🔎 检索文档...", total=None)
+            # task = progress.add_task("检索文档...", total=None)
             results = search_vector_store(vector_store, query, k=k)
-            progress.update(task, description=f"✅ 找到 {len(results)} 个文档")
-        
+            # progress.update(task, description=f"找到 {len(results)} 个文档")
+
         # 显示结果
         console.print(f"\n[bold green]找到 {len(results)} 个相关文档:[/bold green]\n")
         
@@ -385,7 +379,7 @@ def search(index_name, query, k):
                 console.print(f"[dim]元数据: {doc.metadata}[/dim]\n")
         
     except Exception as e:
-        console.print(f"\n[red]❌ 检索失败: {e}[/red]\n")
+        console.print(f"\n[red]检索失败: {e}[/red]\n")
         sys.exit(1)
 
 
@@ -401,7 +395,7 @@ def interactive(index_name):
         # 检查索引
         manager = IndexManager()
         if not manager.index_exists(index_name):
-            console.print(f"\n[red]❌ 索引不存在: {index_name}[/red]\n")
+            console.print(f"\n[red]索引不存在: {index_name}[/red]\n")
             sys.exit(1)
         
         console.print(f"\n[bold green]🤖 RAG 交互模式[/bold green]")
@@ -415,7 +409,7 @@ def interactive(index_name):
             retriever = create_retriever(vector_store)
             agent = create_rag_agent(retriever, streaming=False)
         
-        console.print("[green]✅ 准备完成，开始提问吧！[/green]\n")
+        console.print("[green]准备完成，开始提问吧！[/green]\n")
         
         # 交互循环
         while True:
@@ -446,14 +440,14 @@ def interactive(index_name):
                 console.print("\n")
                 
             except KeyboardInterrupt:
-                console.print("\n\n[yellow]👋 再见！[/yellow]\n")
+                console.print("\n\n[yellow]再见！[/yellow]\n")
                 break
             except Exception as e:
-                console.print(f"\n[red]❌ 错误: {e}[/red]\n")
+                console.print(f"\n[red]错误: {e}[/red]\n")
                 continue
         
     except Exception as e:
-        console.print(f"\n[red]❌ 启动交互模式失败: {e}[/red]\n")
+        console.print(f"\n[red]启动交互模式失败: {e}[/red]\n")
         sys.exit(1)
 
 

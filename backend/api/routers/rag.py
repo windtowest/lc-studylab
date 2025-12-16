@@ -75,7 +75,7 @@ class QueryResponse(BaseModel):
     """查询响应"""
     answer: str
     sources: List[str] = []
-    retrieved_documents: List[dict] = []
+    # retrieved_documents: List[dict] = []
 
 
 class SearchRequest(BaseModel):
@@ -115,7 +115,7 @@ async def create_index(request: CreateIndexRequest):
         ```
     """
     try:
-        logger.info(f"📝 创建索引请求: {request.name}")
+        logger.info(f"创建索引请求: {request.name}")
         
         # 检查目录是否存在
         directory_path = Path(request.directory_path)
@@ -133,7 +133,7 @@ async def create_index(request: CreateIndexRequest):
             )
         
         # 加载文档
-        logger.info(f"📂 加载文档: {directory_path}")
+        logger.info(f"加载文档: {directory_path}")
         documents = load_directory(str(directory_path))
         
         if not documents:
@@ -143,7 +143,7 @@ async def create_index(request: CreateIndexRequest):
             )
         
         # 分块文档
-        logger.info("✂️  分块文档...")
+        logger.info("分块文档...")
         chunks = split_documents(
             documents,
             chunk_size=request.chunk_size,
@@ -151,11 +151,11 @@ async def create_index(request: CreateIndexRequest):
         )
         
         # 创建 embeddings
-        logger.info("🔢 创建 embeddings...")
+        logger.info("创建 embeddings...")
         embeddings = get_embeddings()
         
         # 创建索引
-        logger.info("🗄️  创建向量索引...")
+        logger.info("创建向量索引...")
         index_manager.create_index(
             name=request.name,
             documents=chunks,
@@ -167,13 +167,13 @@ async def create_index(request: CreateIndexRequest):
         # 获取索引信息
         index_info = index_manager.get_index_info(request.name)
         
-        logger.info(f"✅ 索引创建成功: {request.name}")
+        logger.info(f"索引创建成功: {request.name}")
         return IndexInfo(**index_info)
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ 创建索引失败: {e}")
+        logger.error(f"创建索引失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -191,7 +191,7 @@ async def list_indexes():
         indexes = index_manager.list_indexes()
         return [IndexInfo(**idx) for idx in indexes]
     except Exception as e:
-        logger.error(f"❌ 列出索引失败: {e}")
+        logger.error(f"列出索引失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -219,7 +219,7 @@ async def get_index_info(name: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ 获取索引信息失败: {e}")
+        logger.error(f"获取索引信息失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -247,7 +247,7 @@ async def delete_index(name: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ 删除索引失败: {e}")
+        logger.error(f"删除索引失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -272,7 +272,7 @@ async def query(request: QueryRequest):
         ```
     """
     try:
-        logger.info(f"🔍 RAG 查询: {request.query[:50]}...")
+        logger.info(f"RAG 查询: {request.query[:50]}...")
         
         # 检查索引是否存在
         if not index_manager.index_exists(request.index_name):
@@ -298,24 +298,24 @@ async def query(request: QueryRequest):
             return_sources=request.return_sources,
         )
         
-        logger.info("✅ 查询完成")
+        logger.info("查询完成")
         
         return QueryResponse(
             answer=result["answer"],
             sources=result.get("sources", []),
-            retrieved_documents=[
-                {
-                    "content": doc.page_content,
-                    "metadata": doc.metadata,
-                }
-                for doc in result.get("retrieved_documents", [])
-            ],
+            # retrieved_documents=[
+            #     {
+            #         "content": doc.page_content,
+            #         "metadata": doc.metadata,
+            #     }
+            #     for doc in result.get("retrieved_documents", [])
+            # ],
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ 查询失败: {e}")
+        logger.error(f"查询失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -337,7 +337,7 @@ async def query_stream(request: QueryRequest):
         ```
     """
     try:
-        logger.info(f"🔍 RAG 流式查询: {request.query[:50]}...")
+        logger.info(f"RAG 流式查询: {request.query[:50]}...")
         
         # 检查索引是否存在
         if not index_manager.index_exists(request.index_name):
@@ -382,7 +382,7 @@ async def query_stream(request: QueryRequest):
                 yield f"data: {json.dumps({'type': 'done'})}\n\n"
                 
             except Exception as e:
-                logger.error(f"❌ 流式查询错误: {e}")
+                logger.error(f"流式查询错误: {e}")
                 error_data = {
                     "type": "error",
                     "error": str(e),
@@ -401,7 +401,7 @@ async def query_stream(request: QueryRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ 流式查询失败: {e}")
+        logger.error(f"流式查询失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -424,7 +424,7 @@ async def search(request: SearchRequest):
         ```
     """
     try:
-        logger.info(f"🔍 检索: {request.query[:50]}...")
+        logger.info(f"检索: {request.query[:50]}...")
         
         # 检查索引是否存在
         if not index_manager.index_exists(request.index_name):
@@ -446,7 +446,7 @@ async def search(request: SearchRequest):
             score_threshold=request.score_threshold,
         )
         
-        logger.info(f"✅ 找到 {len(results)} 个文档")
+        logger.info(f"找到 {len(results)} 个文档")
         
         return [
             SearchResult(
@@ -460,7 +460,7 @@ async def search(request: SearchRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ 检索失败: {e}")
+        logger.error(f"检索失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

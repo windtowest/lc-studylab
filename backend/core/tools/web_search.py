@@ -1,19 +1,41 @@
 """
 网络搜索工具
-使用 Tavily API 提供网络搜索功能，获取最新信息
+使用 智谱ai 提供网络搜索功能，获取最新信息
 
-Tavily 是一个专为 AI Agent 设计的搜索 API，提供高质量的搜索结果
-
-注意：在 LangChain V1.0.0 中，推荐使用 langchain-tavily 包
-参考：https://python.langchain.com/docs/integrations/tools/tavily_search/
 """
 
 from typing import Optional, List, Dict, Any
 from langchain_core.tools import tool
 
 from config import settings, get_logger
+from core.my_llm import zhipuClient
 
 logger = get_logger(__name__)
+
+
+@tool(parse_docstring=True)
+def zhipu_web_search(query: str) -> str:
+    """
+    互联网搜索的工具， 可以搜索所有公开的信息
+
+    Args:
+        query: 需要进行互联网查询的查询信息
+
+    Returns:
+        返回搜索的结果信息， 改信息是一个文本字符串
+    """
+    try:
+        res = zhipuClient.web_search.web_search(
+            search_query=query,
+            search_engine="search_pro"
+        )
+
+        if res.search_result :
+            return "\n\n".join([r.content for r in res.search_result])
+        return "没有搜索到任何结果"
+    except Exception as e:
+        print(e)
+        return f"Error: {e}"
 
 
 # 尝试导入新的 Tavily 包，如果失败则使用旧的

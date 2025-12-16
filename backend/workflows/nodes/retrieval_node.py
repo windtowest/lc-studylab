@@ -96,7 +96,7 @@ def retrieval_node(state: StudyFlowState) -> Dict[str, Any]:
         logger.info(f"[Retrieval Node] 最终检索到 {len(retrieved_docs)} 个文档")
         
         # 构建检索摘要
-        retrieval_summary = f"\n\n📄 已检索到 {len(retrieved_docs)} 个相关文档，将用于生成学习内容和练习题。"
+        retrieval_summary = f"\n\n 已检索到 {len(retrieved_docs)} 个相关文档，将用于生成学习内容和练习题。"
         
         # 更新状态
         return {
@@ -114,7 +114,7 @@ def retrieval_node(state: StudyFlowState) -> Dict[str, Any]:
         logger.warning("[Retrieval Node] 检索失败，将继续使用 LLM 内置知识")
         return {
             "retrieved_docs": [],
-            "messages": [{"role": "assistant", "content": "\n\n⚠️ 文档检索遇到问题，将使用 AI 内置知识继续生成内容。"}],
+            "messages": [{"role": "assistant", "content": "\n\n文档检索遇到问题，将使用 AI 内置知识继续生成内容。"}],
             "current_step": "retrieval",
             "updated_at": datetime.now().isoformat()
         }

@@ -147,16 +147,17 @@ def create_study_flow_graph(checkpointer_path: str = None) -> StateGraph:
     )
     
     # ==================== 配置检查点 ====================
-    if checkpointer_path is None:
-        # 使用默认路径
-        checkpointer_path = os.path.join(
-            settings.DATA_DIR,
-            "checkpoints",
-            "study_flow.db"
-        )
-    
-    # 确保目录存在
-    os.makedirs(os.path.dirname(checkpointer_path), exist_ok=True)
+    # 数据库存储
+    # if checkpointer_path is None:
+    #     # 使用默认路径
+    #     checkpointer_path = os.path.join(
+    #         settings.DATA_DIR,
+    #         "checkpoints",
+    #         "study_flow.db"
+    #     )
+    #
+    # # 确保目录存在
+    # os.makedirs(os.path.dirname(checkpointer_path), exist_ok=True)
     
     logger.info(f"[Study Flow Graph] 配置检查点存储: {checkpointer_path}")
     

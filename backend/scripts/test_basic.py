@@ -32,18 +32,18 @@ def test_config():
     print("=" * 60)
     
     try:
-        print(f"✅ 应用名称: {settings.app_name}")
-        print(f"✅ 版本: {settings.app_version}")
-        print(f"✅ 模型: {settings.openai_model}")
-        print(f"✅ API Base: {settings.openai_api_base}")
+        print(f"应用名称: {settings.app_name}")
+        print(f"版本: {settings.app_version}")
+        print(f"模型: {settings.deepseek_model}")
+        print(f"API Base: {settings.deepseek_base_url}")
         
         # 验证必需配置
         settings.validate_required_keys()
-        print("✅ 配置验证通过")
+        print("配置验证通过")
         
         return True
     except Exception as e:
-        print(f"❌ 配置测试失败: {e}")
+        print(f"配置测试失败: {e}")
         return False
 
 
@@ -55,12 +55,12 @@ def test_model():
     
     try:
         model = get_chat_model()
-        print(f"✅ 模型创建成功: {model.__class__.__name__}")
-        print(f"✅ 模型名称: {settings.openai_model}")
+        print(f"模型创建成功: {model.__class__.__name__}")
+        print(f"模型名称: {settings.deepseek_model}")
         
         return True
     except Exception as e:
-        print(f"❌ 模型创建失败: {e}")
+        print(f"模型创建失败: {e}")
         return False
 
 
@@ -73,18 +73,18 @@ def test_tools():
     try:
         # 测试时间工具
         time_result = get_current_time.invoke({})
-        print(f"✅ 时间工具: {time_result}")
+        print(f"时间工具: {time_result}")
         
         # 测试计算器工具
         calc_result = calculator.invoke({"expression": "2 + 2"})
-        print(f"✅ 计算器工具: {calc_result}")
+        print(f"计算器工具: {calc_result}")
         
         # 检查工具列表
-        print(f"✅ 基础工具数量: {len(BASIC_TOOLS)}")
+        print(f"基础工具数量: {len(BASIC_TOOLS)}")
         
         return True
     except Exception as e:
-        print(f"❌ 工具测试失败: {e}")
+        print(f"工具测试失败: {e}")
         return False
 
 
@@ -99,21 +99,21 @@ def test_agent():
         agent = create_base_agent(
             # streaming=False
         )
-        print("✅ Agent 创建成功")
+        print("Agent 创建成功")
         
         # 测试简单对话
         print("\n测试对话: '你好'")
         response = agent.invoke("你好，请用一句话介绍自己")
-        print(f"✅ Agent 响应: {response[:100]}...")
+        print(f"Agent 响应: {response[:100]}...")
         
         # 测试工具调用
         print("\n测试工具调用: '现在几点？'")
         response = agent.invoke("现在几点？")
-        print(f"✅ Agent 响应: {response}")
+        print(f"Agent 响应: {response}")
         
         return True
     except Exception as e:
-        print(f"❌ Agent 测试失败: {e}")
+        print(f"Agent 测试失败: {e}")
         logger.error(f"Agent 测试错误: {e}", exc_info=True)
         return False
 
@@ -141,16 +141,16 @@ def main():
     total = len(results)
     
     for name, result in results:
-        status = "✅ 通过" if result else "❌ 失败"
+        status = "通过" if result else "失败"
         print(f"{name}: {status}")
     
     print(f"\n总计: {passed}/{total} 测试通过")
     
     if passed == total:
-        print("\n🎉 所有测试通过！第 1 阶段功能正常。")
+        print("\n所有测试通过！第 1 阶段功能正常。")
         return 0
     else:
-        print(f"\n⚠️  有 {total - passed} 个测试失败，请检查配置和日志。")
+        print(f"\n有 {total - passed} 个测试失败，请检查配置和日志。")
         return 1
 
 
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         print("\n\n测试被中断")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ 测试程序错误: {e}")
+        print(f"\n测试程序错误: {e}")
         logger.error(f"测试程序错误: {e}", exc_info=True)
         sys.exit(1)
 

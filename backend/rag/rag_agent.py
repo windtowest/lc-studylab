@@ -1,7 +1,7 @@
 """
 RAG Agent 模块
 
-基于 LangChain 1.0.3 的 create_tool_calling_agent 实现 RAG Agent。
+基于 LangChain 1.0.3 实现 RAG Agent。
 
 RAG Agent 的核心特性：
 - 自动检索相关文档
@@ -23,6 +23,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 
 from config import settings, get_logger
 from core.models import get_chat_model, get_model_string
+from core.my_llm import my_deepseek
 from rag.retrievers import create_retriever_tool
 
 logger = get_logger(__name__)
@@ -35,22 +36,16 @@ DEFAULT_RAG_SYSTEM_PROMPT = """你是一个智能问答助手，专门回答基�
 1. 使用 knowledge_base 工具搜索相关信息
 2. 基于检索到的文档内容回答用户问题
 3. 如果文档中没有相关信息，诚实地告诉用户
-4. 在回答中引用来源文档（如果有 source 信息）
 
 回答要求：
 - 准确：严格基于文档内容，不要编造信息
 - 完整：尽可能提供详细的回答
 - 清晰：使用简洁明了的语言
-- 引用：在回答末尾列出参考的文档来源
 
 示例回答格式：
 [回答内容]
 
-参考来源：
-- 文档1: [来源信息]
-- 文档2: [来源信息]
 """
-
 
 def create_rag_agent(
     retriever: BaseRetriever,
@@ -102,12 +97,16 @@ def create_rag_agent(
         >>> for chunk in agent.stream("解释深度学习"):
         ...     print(chunk, end="", flush=True)
     """
-    logger.info("🤖 创建 RAG Agent")
+    logger.info("创建 RAG Agent")
     
     # 使用默认模型
     if model is None:
-        model = get_model_string()
-    
+        # openai模型
+        # model = get_model_string()
+
+        # deepseek模型
+        model = my_deepseek
+
     # 使用默认系统提示词
     if system_prompt is None:
         system_prompt = DEFAULT_RAG_SYSTEM_PROMPT
@@ -128,7 +127,7 @@ def create_rag_agent(
     
     tools = [retriever_tool]
     
-    logger.debug("   创建 Agent...")
+    logger.info("   创建 rag Agent...")
     
     # 使用 LangChain 1.0.3 的 create_agent API
     agent = create_agent(
@@ -138,8 +137,8 @@ def create_rag_agent(
         **kwargs,
     )
     
-    logger.info(f"✅ RAG Agent 创建成功")
-    logger.info(f"   模型: {model}")
+    logger.info(f"RAG Agent 创建成功")
+    logger.info(f"   模型: {model.model_name}")
     logger.info(f"   流式输出: {streaming}")
     
     return agent
@@ -256,7 +255,7 @@ def create_conversational_rag_agent(
 - 引用：适当引用来源文档
 """
     
-    logger.info("💬 创建对话式 RAG Agent")
+    logger.info("创建对话式 RAG Agent")
     
     return create_rag_agent(
         retriever=retriever,
@@ -287,31 +286,33 @@ def query_rag_agent(
         >>> result = query_rag_agent(agent, "什么是机器学习？")
         >>> print(result["answer"])
     """
-    logger.info(f"🔍 查询 RAG Agent: {query[:50]}...")
-    
+
     try:
         # 执行查询 - LangChain 1.0.3 的 agent 需要字典输入
+        logger.info(f"查询 RAG Agent: {query[:50]}...")
         result = agent.invoke({"messages": [{"role": "user", "content": query}]})
-        
         # 提取回答
         if isinstance(result, dict) and "messages" in result:
             # 获取最后一条消息
             messages = result["messages"]
+            # logger.info(f"这是toolMessage{messages[-2]}")
             if messages:
                 answer = messages[-1].content if hasattr(messages[-1], 'content') else str(messages[-1])
+                sources = messages[-2].artifact if hasattr(messages[-2], 'artifact') else None
             else:
                 answer = str(result)
         else:
             answer = str(result)
         
         # 格式化响应
-        formatted = {"answer": answer}
+        # print(f"这是sources: {sources}")
+        formatted = {"answer": answer, "sources": sources}
         
-        logger.info("✅ 查询完成")
+        logger.info("查询完成")
         return formatted
         
     except Exception as e:
-        logger.error(f"❌ 查询失败: {e}")
+        logger.error(f"查询失败: {e}")
         raise
 
 
@@ -335,7 +336,7 @@ async def aquery_rag_agent(
         >>> agent = create_rag_agent(retriever)
         >>> result = await aquery_rag_agent(agent, "什么是机器学习？")
     """
-    logger.info(f"🔍 异步查询 RAG Agent: {query[:50]}...")
+    logger.info(f"异步查询 RAG Agent: {query[:50]}...")
     
     try:
         # 异步执行查询 - LangChain 1.0.3 的 agent 需要字典输入
@@ -355,10 +356,10 @@ async def aquery_rag_agent(
         # 格式化响应
         formatted = {"answer": answer}
         
-        logger.info("✅ 异步查询完成")
+        logger.info("异步查询完成")
         return formatted
         
     except Exception as e:
-        logger.error(f"❌ 异步查询失败: {e}")
+        logger.error(f"异步查询失败: {e}")
         raise
 

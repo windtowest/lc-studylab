@@ -2,7 +2,7 @@
 基础 Agent 模块
 使用 LangChain 1.0.3 的全新 create_agent API 实现通用的智能体封装
 
-这是第 1 阶段的核心模块，实现：
+实现：
 1. 基于 LangChain V1.0.0 的 create_agent API
 2. 流式输出支持（Streaming）
 3. 工具调用集成
@@ -27,6 +27,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.agents import create_agent  # LangChain V1.0.0 的新 API
 
 from core.models import get_chat_model, get_streaming_model
+from core.my_llm import my_deepseek
 from core.prompts import get_system_prompt, get_prompt_with_tools
 from core.tools import ALL_TOOLS, BASIC_TOOLS
 from config import settings, get_logger
@@ -105,25 +106,27 @@ class BaseAgent:
         if model is None:
             # 使用默认模型（从配置读取）
             # create_agent 接受字符串格式，如 "openai:gpt-4o"
-            self.model = f"openai:{settings.openai_model}"
-            logger.info(f"🤖 使用默认模型: {self.model}")
+            # self.model = f"openai:{settings.openai_model}"
+            # logger.info(f"使用默认模型: {self.model}")
+            self.model = my_deepseek
+            logger.info(f"使用默认模型: {self.model.model_name}")
         elif isinstance(model, str):
             # 字符串标识符
             self.model = model
-            logger.info(f"🤖 使用模型标识符: {model}")
+            logger.info(f"使用模型标识符: {model}")
         else:
             # BaseChatModel 实例
             self.model = model
-            logger.info(f"🤖 使用自定义模型实例: {model.__class__.__name__}")
+            logger.info(f"使用自定义模型实例: {model.__class__.__name__}")
         
         # ==================== 工具初始化 ====================
         if tools is None:
             # 默认使用基础工具集（不需要 API Key）
             self.tools = BASIC_TOOLS
-            logger.info(f"🔧 使用基础工具集 ({len(self.tools)} 个工具)")
+            logger.info(f"使用基础工具集 ({len(self.tools)} 个工具)")
         else:
             self.tools = list(tools) if tools else []
-            logger.info(f"🔧 使用自定义工具集 ({len(self.tools)} 个工具)")
+            logger.info(f"使用自定义工具集 ({len(self.tools)} 个工具)")
         
         # 打印工具列表
         if self.tools:
@@ -136,14 +139,14 @@ class BaseAgent:
             if self.tools:
                 # 如果有工具，使用包含工具说明的提示词
                 self.system_prompt = get_prompt_with_tools(mode=prompt_mode)
-                logger.info(f"📝 使用带工具说明的系统提示词 (模式: {prompt_mode})")
+                logger.info(f"使用带工具说明的系统提示词 (模式: {prompt_mode})")
             else:
                 # 没有工具，使用普通提示词
                 self.system_prompt = get_system_prompt(mode=prompt_mode)
-                logger.info(f"📝 使用普通系统提示词 (模式: {prompt_mode})")
+                logger.info(f"使用普通系统提示词 (模式: {prompt_mode})")
         else:
             self.system_prompt = system_prompt
-            logger.info("📝 使用自定义系统提示词")
+            logger.info("使用自定义系统提示词")
         
         # ==================== Agent 配置 ====================
         self.debug = debug
@@ -152,7 +155,7 @@ class BaseAgent:
         # 在 LangChain V1.0.0 中，使用 create_agent 直接创建
         # 它返回一个 CompiledStateGraph，内部已经实现了完整的工具调用循环
         try:
-            logger.info("🔨 创建 Agent（使用 LangChain V1.0.0 create_agent API）...")
+            logger.info("创建 Agent（使用 LangChain V1.0.0 create_agent API）...")
             
             # 调用 create_agent
             # 参考：https://reference.langchain.com/python/langchain/agents/#langchain.agents.create_agent
@@ -164,11 +167,11 @@ class BaseAgent:
                 **kwargs,  # 支持 checkpointer, store, interrupt_before/after, name 等
             )
             
-            logger.info("✅ Agent 创建成功（CompiledStateGraph）")
+            logger.info(" Agent 创建成功（CompiledStateGraph）")
             logger.debug(f"   配置: debug={self.debug}, tools={len(self.tools)}")
             
         except Exception as e:
-            logger.error(f"❌ Agent 创建失败: {e}")
+            logger.error(f"Agent 创建失败: {e}")
             raise
     
     def invoke(
@@ -199,7 +202,7 @@ class BaseAgent:
         参考：
             https://docs.langchain.com/oss/python/langchain/agents
         """
-        logger.info(f"🚀 执行 Agent 调用: {input_text[:50]}...")
+        logger.info(f"执行 Agent 调用: {input_text[:50]}...")
         
         try:
             # 准备消息列表
@@ -232,14 +235,14 @@ class BaseAgent:
                     ai_response = msg.content
                     break
             
-            logger.info(f"✅ Agent 调用完成，输出长度: {len(ai_response)} 字符")
+            logger.info(f"Agent 调用完成，输出长度: {len(ai_response)} 字符")
             logger.debug(f"   输出: {ai_response[:100]}...")
             
             return ai_response
             
         except Exception as e:
             error_msg = f"Agent 执行失败: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f" {error_msg}")
             return f"抱歉，处理您的请求时出现错误: {str(e)}"
     
     def stream(
@@ -275,7 +278,7 @@ class BaseAgent:
         参考：
             https://docs.langchain.com/oss/python/langchain/agents
         """
-        logger.info(f"🌊 执行 Agent 流式调用: {input_text[:50]}...")
+        logger.info(f"执行 Agent 流式调用: {input_text[:50]}...")
         
         try:
             # 准备消息列表
@@ -312,11 +315,11 @@ class BaseAgent:
                             if isinstance(last_msg, AIMessage) and last_msg.content:
                                 yield last_msg.content
             
-            logger.info("✅ Agent 流式调用完成")
+            logger.info("Agent 流式调用完成")
             
         except Exception as e:
             error_msg = f"Agent 流式执行失败: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
             yield f"\n\n抱歉，处理您的请求时出现错误: {str(e)}"
     
     async def ainvoke(
@@ -343,7 +346,7 @@ class BaseAgent:
             >>> response = await agent.ainvoke("你好")
             >>> print(response)
         """
-        logger.info(f"🚀 执行 Agent 异步调用: {input_text[:50]}...")
+        logger.info(f"执行 Agent 异步调用: {input_text[:50]}...")
         
         try:
             # 准备消息列表
@@ -367,12 +370,12 @@ class BaseAgent:
                     ai_response = msg.content
                     break
             
-            logger.info(f"✅ Agent 异步调用完成")
+            logger.info(f" Agent 异步调用完成")
             return ai_response
             
         except Exception as e:
             error_msg = f"Agent 异步执行失败: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
             return f"抱歉，处理您的请求时出现错误: {str(e)}"
     
     async def astream(
@@ -399,7 +402,7 @@ class BaseAgent:
             >>> async for chunk in agent.astream("讲个笑话"):
             ...     print(chunk, end="", flush=True)
         """
-        logger.info(f"🌊 执行 Agent 异步流式调用: {input_text[:50]}...")
+        logger.info(f" 执行 Agent 异步流式调用: {input_text[:50]}...")
         
         try:
             # 准备消息列表
@@ -431,11 +434,11 @@ class BaseAgent:
                             if isinstance(last_msg, AIMessage) and last_msg.content:
                                 yield last_msg.content
             
-            logger.info("✅ Agent 异步流式调用完成")
+            logger.info("Agent 异步流式调用完成")
             
         except Exception as e:
             error_msg = f"Agent 异步流式执行失败: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
             yield f"\n\n抱歉，处理您的请求时出现错误: {str(e)}"
 
 
@@ -478,7 +481,7 @@ def create_base_agent(
     参考：
         https://docs.langchain.com/oss/python/langchain/agents
     """
-    logger.info(f"🏭 创建 Base Agent (mode={prompt_mode}, debug={debug})")
+    logger.info(f"创建 Base Agent (mode={prompt_mode}, debug={debug})")
     
     return BaseAgent(
         model=model,

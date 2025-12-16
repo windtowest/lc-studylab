@@ -14,11 +14,15 @@
 """
 
 from typing import Optional, Literal
+
+from langchain_core.tools.simple import Tool
 from langchain_core.vectorstores import VectorStore
 from langchain_core.retrievers import BaseRetriever
-from langchain_core.tools.retriever import create_retriever_tool as lc_create_retriever_tool
+# from langchain_core.tools.retriever import create_retriever_tool as lc_create_retriever_tool
+from rag.my_custom_create_retriever_tool import create_retriever_tool as custom_create_retriever_tool
 
 from config import settings, get_logger
+from rag import get_embeddings, load_vector_store
 
 logger = get_logger(__name__)
 
@@ -88,7 +92,7 @@ def create_retriever(
     score_threshold = score_threshold or settings.retriever_score_threshold
     fetch_k = fetch_k or settings.retriever_fetch_k
     
-    logger.info(f"🔍 创建检索器: search_type={search_type}, k={k}")
+    logger.info(f"创建检索器: search_type={search_type}, k={k}")
     
     # 构建搜索参数
     search_kwargs = {"k": k}
@@ -111,11 +115,11 @@ def create_retriever(
             search_kwargs=search_kwargs,
         )
         
-        logger.info("✅ 检索器创建成功")
+        logger.info("检索器创建成功")
         return retriever
         
     except Exception as e:
-        logger.error(f"❌ 创建检索器失败: {e}")
+        logger.error(f"创建检索器失败: {e}")
         raise
 
 
@@ -123,7 +127,7 @@ def create_retriever_tool(
     retriever: BaseRetriever,
     name: str = "knowledge_base",
     description: Optional[str] = None,
-) -> any:
+) -> Tool:
     """
     将检索器封装为 LangChain Tool
     
@@ -171,65 +175,24 @@ def create_retriever_tool(
             "输入应该是一个搜索查询。"
         )
     
-    logger.info(f"🔧 创建检索器工具: {name}")
+    logger.info(f"创建检索器工具: {name}")
     logger.debug(f"   描述: {description}")
     
     try:
-        # 使用 LangChain 的 create_retriever_tool
-        tool = lc_create_retriever_tool(
+        # 使用 自定义 的 create_retriever_tool
+        tool = custom_create_retriever_tool(
             retriever=retriever,
             name=name,
             description=description,
+            response_format= "content_and_artifact" # 返回文档信息
         )
         
-        logger.info("✅ 检索器工具创建成功")
+        logger.info("检索器工具创建成功")
         return tool
         
     except Exception as e:
-        logger.error(f"❌ 创建检索器工具失败: {e}")
+        logger.error(f"创建检索器工具失败: {e}")
         raise
-
-
-def test_retriever(
-    retriever: BaseRetriever,
-    query: str = "测试查询",
-    show_results: bool = True,
-) -> bool:
-    """
-    测试检索器是否正常工作
-    
-    Args:
-        retriever: 检索器实例
-        query: 测试查询
-        show_results: 是否显示检索结果
-        
-    Returns:
-        是否测试成功
-        
-    Example:
-        >>> if test_retriever(retriever, "什么是机器学习？"):
-        ...     print("检索器工作正常")
-    """
-    try:
-        logger.info(f"🧪 测试检索器: query='{query}'")
-        
-        # 执行检索
-        docs = retriever.invoke(query)
-        
-        logger.info(f"✅ 检索成功: 找到 {len(docs)} 个文档")
-        
-        if show_results and docs:
-            logger.info("📄 检索结果:")
-            for i, doc in enumerate(docs, 1):
-                logger.info(f"   [{i}] {doc.page_content[:100]}...")
-                if doc.metadata:
-                    logger.info(f"       元数据: {doc.metadata}")
-        
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ 检索器测试失败: {e}")
-        return False
 
 
 def create_multi_retriever(
@@ -262,7 +225,7 @@ def create_multi_retriever(
     try:
         from langchain.retrievers import EnsembleRetriever
         
-        logger.info(f"🔗 创建组合检索器: {len(retrievers)} 个检索器")
+        logger.info(f"创建组合检索器: {len(retrievers)} 个检索器")
         
         # 提取检索器和权重
         retriever_list = [r for r, _ in retrievers]
@@ -274,14 +237,14 @@ def create_multi_retriever(
             **kwargs,
         )
         
-        logger.info("✅ 组合检索器创建成功")
+        logger.info("组合检索器创建成功")
         return ensemble
         
     except ImportError:
-        logger.error("❌ EnsembleRetriever 不可用")
+        logger.error("EnsembleRetriever 不可用")
         raise
     except Exception as e:
-        logger.error(f"❌ 创建组合检索器失败: {e}")
+        logger.error(f"创建组合检索器失败: {e}")
         raise
 
 
@@ -324,7 +287,7 @@ def get_retriever_config(search_type: str = "similarity") -> dict:
         return configs["similarity"]
     
     config = configs[search_type].copy()
-    logger.info(f"📋 推荐的检索器配置 ({search_type}):")
+    logger.info(f"推荐的检索器配置 ({search_type}):")
     logger.info(f"   {config.get('description', '')}")
     
     # 移除描述字段
@@ -332,3 +295,60 @@ def get_retriever_config(search_type: str = "similarity") -> dict:
     
     return config
 
+
+def test_retriever(
+        retriever: BaseRetriever,
+        query: str = "测试查询",
+        show_results: bool = True,
+) -> bool:
+    """
+    测试检索器是否正常工作
+
+    Args:
+        retriever: 检索器实例
+        query: 测试查询
+        show_results: 是否显示检索结果
+
+    Returns:
+        是否测试成功
+
+    Example:
+        >>> if test_retriever(retriever, "什么是机器学习？"):
+        ...     print("检索器工作正常")
+    """
+    try:
+        logger.info(f"测试检索器: query='{query}'")
+
+        # 执行检索
+        docs = retriever.invoke(query)
+
+        logger.info(f"检索成功: 找到 {len(docs)} 个文档")
+
+        if show_results and docs:
+            logger.info("检索结果:")
+            for i, doc in enumerate(docs, 1):
+                logger.info(f"   [{i}] {doc.page_content[:100]}...")
+                if doc.metadata:
+                    logger.info(f"       元数据: {doc.metadata}")
+
+        return True
+
+    except Exception as e:
+        logger.error(f"检索器测试失败: {e}")
+        return False
+
+
+
+if __name__ == "__main__":
+    # 加载向量库
+    embeddings = get_embeddings()
+    vector_store = load_vector_store("../data/indexes/test_index", embeddings)
+
+    # 创建相似度检索器
+    retriever = create_retriever(vector_store, search_type="similarity", k=4)
+
+    # 使用检索器
+    docs = retriever.invoke("什么是机器学习？")
+    for doc in docs:
+        print(doc.page_content[:100])
+    test_retriever(retriever)

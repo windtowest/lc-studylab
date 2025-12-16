@@ -17,6 +17,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.embeddings import Embeddings
 
 from config import settings, get_logger
+from rag.my_custom_emddings import MyCustomEmbeddings
 
 logger = get_logger(__name__)
 
@@ -60,25 +61,31 @@ def get_embeddings(
     model = model or settings.embedding_model
     batch_size = batch_size or settings.embedding_batch_size
     
-    logger.info(f"🔢 创建 Embedding 模型: {model}")
+    logger.info(f"创建 Embedding 模型: {model}")
     logger.debug(f"   batch_size: {batch_size}")
     
     try:
         # 创建 OpenAI Embeddings 实例
-        embeddings = OpenAIEmbeddings(
-            model=model,
-            api_key=settings.openai_api_key,
-            base_url=settings.openai_api_base,
-            # chunk_size 参数控制批处理大小
-            chunk_size=batch_size,
-            **kwargs,
-        )
+        # embeddings = OpenAIEmbeddings(
+        #     model=model,
+        #     api_key=settings.openai_api_key,
+        #     base_url=settings.openai_api_base,
+        #     # chunk_size 参数控制批处理大小
+        #     chunk_size=batch_size,
+        #     # dimensions = 1024,
+        #     **kwargs,
+        # )
+
+        # 创建qwen Embeddings 模型
+        embeddings = MyCustomEmbeddings(settings.local_model_path + model)
         
-        logger.debug(f"✅ Embedding 模型创建成功")
+        logger.info(f"Embedding 模型创建成功")
+        logger.info(f"Embedding 模型所用设备为: {embeddings.check_device()}")
+
         return embeddings
         
     except Exception as e:
-        logger.error(f"❌ 创建 Embedding 模型失败: {e}")
+        logger.error(f"创建 Embedding 模型失败: {e}")
         raise
 
 
@@ -151,7 +158,7 @@ def estimate_embedding_cost(
     cost = (num_tokens / 1_000_000) * price_per_million
     
     logger.info(
-        f"💰 Embedding 成本估算: "
+        f" Embedding 成本估算: "
         f"{num_tokens:,} tokens × ${price_per_million}/M = ${cost:.4f}"
     )
     
@@ -177,24 +184,24 @@ def test_embeddings(
         ...     print("Embedding 模型工作正常")
     """
     try:
-        logger.info("🧪 测试 Embedding 模型...")
+        logger.info("测试 Embedding 模型...")
         
         embeddings = get_embeddings(model=model)
-        
+        logger.info("创建embedding成功")
         # 测试单个文本嵌入
         vector = embeddings.embed_query(test_text)
-        logger.info(f"   单文本嵌入: 维度={len(vector)}")
+        logger.info(f" 单文本嵌入: 维度={len(vector)}")
         
         # 测试批量嵌入
         texts = [test_text, test_text + " 2", test_text + " 3"]
         vectors = embeddings.embed_documents(texts)
-        logger.info(f"   批量嵌入: {len(vectors)} 个向量")
+        logger.info(f"批量嵌入: {len(vectors)} 个向量")
         
-        logger.info("✅ Embedding 模型测试通过")
+        logger.info("Embedding 模型测试通过")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Embedding 模型测试失败: {e}")
+        logger.error(f"Embedding 模型测试失败: {e}")
         return False
 
 
@@ -253,6 +260,10 @@ def get_embeddings_by_preset(
     config.pop("description", None)
     config.update(kwargs)
     
-    logger.info(f"📋 使用预设 Embedding 配置: {preset}")
+    logger.info(f"使用预设 Embedding 配置: {preset}")
     return get_embeddings(model=model, **config)
+
+if __name__ == "__main__":
+    # test_openai()
+    test_embeddings()
 

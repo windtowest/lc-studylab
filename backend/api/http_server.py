@@ -41,38 +41,38 @@ async def lifespan(app: FastAPI):
     """
     # ==================== 启动时 ====================
     logger.info("=" * 60)
-    logger.info(f"🚀 {settings.app_name} v{settings.app_version} 正在启动...")
+    logger.info(f"{settings.app_name} v{settings.app_version} 正在启动...")
     logger.info("=" * 60)
     
     # 验证配置
     try:
         settings.validate_required_keys()
-        logger.info("✅ 配置验证通过")
+        logger.info("配置验证通过")
     except ValueError as e:
-        logger.warning(f"⚠️  配置警告: {e}")
+        logger.warning(f"配置警告: {e}")
     
     # 打印配置信息
-    logger.info(f"📊 运行环境:")
-    logger.info(f"   - 模型: {settings.openai_model}")
-    logger.info(f"   - API Base: {settings.openai_api_base}")
+    logger.info(f"运行环境:")
+    logger.info(f"   - 模型: {settings.deepseek_model}")
+    logger.info(f"   - API Base: {settings.deepseek_base_url}")
     logger.info(f"   - 调试模式: {settings.debug}")
     logger.info(f"   - 日志级别: {settings.log_level}")
     
     # 检查可选功能
-    if settings.tavily_api_key:
-        logger.info("   - Tavily 搜索: ✅ 已启用")
+    if settings.zhipu_api_key:
+        logger.info("   - 智谱ai搜索: 已启用")
     else:
-        logger.info("   - Tavily 搜索: ⚠️  未配置")
+        logger.info("   - 智谱ai搜索: 未配置")
     
     logger.info("=" * 60)
-    logger.info("✅ 应用启动完成，准备接收请求")
+    logger.info("应用启动完成，准备接收请求")
     logger.info("=" * 60)
     
     yield
     
     # ==================== 关闭时 ====================
     logger.info("=" * 60)
-    logger.info("👋 应用正在关闭...")
+    logger.info("应用正在关闭...")
     logger.info("=" * 60)
 
 
@@ -80,7 +80,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    description="LC-StudyLab 智能学习 & 研究助手 - 后端 API",
+    description="tzl-StudyLab 智能学习 & 研究助手 - 后端 API",
     version=settings.app_version,
     lifespan=lifespan,
     docs_url="/docs",  # Swagger UI
@@ -112,7 +112,7 @@ async def log_requests(request: Request, call_next):
     start_time = time.time()
     
     # 记录请求
-    logger.info(f"📥 {request.method} {request.url.path}")
+    logger.info(f"{request.method} {request.url.path}")
     
     # 处理请求
     try:
@@ -123,7 +123,7 @@ async def log_requests(request: Request, call_next):
         
         # 记录响应
         logger.info(
-            f"📤 {request.method} {request.url.path} "
+            f"{request.method} {request.url.path} "
             f"- {response.status_code} - {process_time:.3f}s"
         )
         
@@ -135,7 +135,7 @@ async def log_requests(request: Request, call_next):
     except Exception as e:
         process_time = time.time() - start_time
         logger.error(
-            f"❌ {request.method} {request.url.path} "
+            f"{request.method} {request.url.path} "
             f"- 错误: {str(e)} - {process_time:.3f}s"
         )
         raise
@@ -150,7 +150,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     
     捕获所有未处理的异常，返回统一的错误响应
     """
-    logger.error(f"❌ 未处理的异常: {exc}", exc_info=True)
+    logger.error(f"未处理的异常: {exc}", exc_info=True)
     
     return JSONResponse(
         status_code=500,
@@ -217,12 +217,12 @@ async def get_info():
     return {
         "app_name": settings.app_name,
         "version": settings.app_version,
-        "model": settings.openai_model,
+        "model": settings.deepseek_model,
         "features": {
             "chat": True,
             "streaming": True,
             "tools": True,
-            "web_search": bool(settings.tavily_api_key),
+            "web_search": bool(settings.zhipu_api_key),
             "rag": True,  # 第 2 阶段 ✅
             "workflow": True,  # 第 3 阶段 ✅
             "deep_research": False,  # 第 4 阶段
@@ -235,7 +235,7 @@ async def get_info():
 if __name__ == "__main__":
     import uvicorn
     
-    logger.info("🔧 以开发模式启动服务器...")
+    logger.info("0以开发模式启动服务器...")
     
     uvicorn.run(
         "api.http_server:app",

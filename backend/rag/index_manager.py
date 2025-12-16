@@ -76,7 +76,7 @@ class IndexManager:
         self.base_path = Path(base_path or settings.vector_store_path)
         self.base_path.mkdir(parents=True, exist_ok=True)
         
-        logger.info(f"📁 索引管理器初始化: {self.base_path}")
+        logger.info(f"索引管理器初始化: {self.base_path}")
     
     def _get_index_path(self, name: str) -> Path:
         """获取索引的完整路径"""
@@ -98,12 +98,11 @@ class IndexManager:
         with open(metadata_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
         
-        logger.debug(f"💾 保存元数据: {metadata_path}")
+        logger.debug(f"保存元数据: {metadata_path}")
     
     def _load_metadata(self, name: str) -> Optional[Dict[str, Any]]:
         """加载索引元数据"""
         metadata_path = self._get_metadata_path(name)
-        
         if not metadata_path.exists():
             return None
         
@@ -112,7 +111,7 @@ class IndexManager:
                 metadata = json.load(f)
             return metadata
         except Exception as e:
-            logger.error(f"❌ 加载元数据失败: {e}")
+            logger.error(f"加载元数据失败: {e}")
             return None
     
     def create_index(
@@ -159,7 +158,7 @@ class IndexManager:
                 f"索引已存在: {name}。使用 overwrite=True 来覆盖。"
             )
         
-        logger.info(f"🔨 创建索引: {name}")
+        logger.info(f"   创建索引: {name}")
         logger.info(f"   文档数量: {len(documents)}")
         logger.info(f"   描述: {description}")
         
@@ -187,11 +186,11 @@ class IndexManager:
             }
             self._save_metadata(name, metadata)
             
-            logger.info(f"✅ 索引创建成功: {name}")
+            logger.info(f"索引创建成功: {name}")
             return vector_store
             
         except Exception as e:
-            logger.error(f"❌ 创建索引失败: {e}")
+            logger.error(f"创建索引失败: {e}")
             # 清理失败的索引
             if index_path.exists():
                 delete_vector_store(str(index_path))
@@ -221,15 +220,15 @@ class IndexManager:
             >>> vector_store = manager.load_index("my_docs", embeddings)
         """
         index_path = self._get_index_path(name)
-        
         if not index_path.exists():
             raise FileNotFoundError(f"索引不存在: {name}")
         
-        logger.info(f"📂 加载索引: {name}")
+        logger.info(f"加载索引: {name}")
         
         try:
             # 加载元数据
             metadata = self._load_metadata(name)
+            logger.info(f"元数据为 metadata: {metadata}")
             if metadata:
                 logger.info(f"   描述: {metadata.get('description', 'N/A')}")
                 logger.info(f"   文档数: {metadata.get('num_documents', 'N/A')}")
@@ -241,11 +240,11 @@ class IndexManager:
                 **kwargs,
             )
             
-            logger.info(f"✅ 索引加载成功: {name}")
+            logger.info(f"索引加载成功: {name}")
             return vector_store
             
         except Exception as e:
-            logger.error(f"❌ 加载索引失败: {e}")
+            logger.error(f"加载索引失败: {e}")
             raise
     
     def update_index(
@@ -275,7 +274,7 @@ class IndexManager:
             >>> # 更新索引
             >>> manager.update_index("my_docs", chunks, embeddings)
         """
-        logger.info(f"🔄 更新索引: {name}")
+        logger.info(f"   更新索引: {name}")
         logger.info(f"   新增文档: {len(documents)}")
         
         try:
@@ -295,11 +294,11 @@ class IndexManager:
             metadata["num_documents"] = metadata.get("num_documents", 0) + len(documents)
             self._save_metadata(name, metadata)
             
-            logger.info(f"✅ 索引更新成功: {name}")
+            logger.info(f"索引更新成功: {name}")
             return vector_store
             
         except Exception as e:
-            logger.error(f"❌ 更新索引失败: {e}")
+            logger.error(f"更新索引失败: {e}")
             raise
     
     def delete_index(self, name: str) -> None:
@@ -318,14 +317,14 @@ class IndexManager:
             logger.warning(f"索引不存在: {name}")
             return
         
-        logger.info(f"🗑️  删除索引: {name}")
+        logger.info(f"删除索引: {name}")
         
         try:
             delete_vector_store(str(index_path))
-            logger.info(f"✅ 索引删除成功: {name}")
+            logger.info(f"索引删除成功: {name}")
             
         except Exception as e:
-            logger.error(f"❌ 删除索引失败: {e}")
+            logger.error(f"删除索引失败: {e}")
             raise
     
     def list_indexes(self) -> List[Dict[str, Any]]:
@@ -340,7 +339,7 @@ class IndexManager:
             >>> for idx in indexes:
             ...     print(f"{idx['name']}: {idx['description']}")
         """
-        logger.info("📋 列出所有索引")
+        logger.info("列出所有索引")
         
         indexes = []
         

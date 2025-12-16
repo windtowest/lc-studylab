@@ -55,9 +55,9 @@ def print_banner():
     """打印欢迎横幅"""
     banner = f"""
 {Colors.CYAN}{'=' * 70}
-{Colors.BOLD}  🎓 LC-StudyLab 智能学习助手 - CLI 演示工具
+{Colors.BOLD}  TZL-StudyLab 智能学习助手 - CLI 演示工具
 {Colors.ENDC}{Colors.CYAN}  版本: {settings.app_version}
-  模型: {settings.openai_model}
+  模型: {settings.deepseek_model}
 {'=' * 70}{Colors.ENDC}
 """
     print(banner)
@@ -78,7 +78,7 @@ def print_help():
 {Colors.YELLOW}快捷测试:{Colors.ENDC}
   {Colors.CYAN}现在几点？{Colors.ENDC}              - 测试时间工具
   {Colors.CYAN}计算 123 + 456{Colors.ENDC}         - 测试计算器工具
-  {Colors.CYAN}搜索 LangChain 1.0.3{Colors.ENDC}   - 测试网络搜索（需要 Tavily API Key）
+  {Colors.CYAN}搜索 LangChain 1.0.3{Colors.ENDC}   - 测试网络搜索（需要 智谱ai API Key）
 
 直接输入消息开始对话！
 """
@@ -166,7 +166,7 @@ class ChatSession:
         
         if self.streaming:
             # 流式输出
-            print_colored("🤖 助手: ", Colors.BLUE, end="")
+            print_colored("助手: ", Colors.BLUE, end="")
             
             full_response = ""
             async for chunk in self.agent.astream(
@@ -205,13 +205,13 @@ async def main():
     try:
         settings.validate_required_keys()
     except ValueError as e:
-        print_colored(f"❌ 配置错误: {e}", Colors.RED)
-        print_colored("请在 .env 文件中设置 OPENAI_API_KEY", Colors.YELLOW)
+        print_colored(f"配置错误: {e}", Colors.RED)
+        print_colored("请在 .env 文件中设置 DEEPSEEK_API_KEY", Colors.YELLOW)
         return
     
     # 检查可选功能
-    if not settings.tavily_api_key:
-        print_colored("⚠️  未配置 Tavily API Key，网络搜索功能将不可用", Colors.YELLOW)
+    if not settings.zhipu_api_key:
+        print_colored("未配置 zhipu_api_key，网络搜索功能将不可用", Colors.YELLOW)
     
     print_help()
     
@@ -220,14 +220,14 @@ async def main():
         mode="default",
         streaming=False,
         use_tools=True,
-        use_advanced_tools=bool(settings.tavily_api_key),
+        use_advanced_tools=bool(settings.zhipu_api_key),
     )
     
     # 主循环
     while True:
         try:
             # 获取用户输入
-            print_colored("\n👤 你: ", Colors.GREEN, end="")
+            print_colored("\你: ", Colors.GREEN, end="")
             user_input = input().strip()
             
             if not user_input:
@@ -238,7 +238,7 @@ async def main():
                 command = user_input.lower()
                 
                 if command == "/quit" or command == "/exit" or command == "/q":
-                    print_colored("\n👋 再见！", Colors.CYAN)
+                    print_colored("\n再见！", Colors.CYAN)
                     break
                 
                 elif command == "/help" or command == "/h":
@@ -265,7 +265,7 @@ async def main():
                     session.show_info()
                 
                 else:
-                    print_colored(f"❌ 未知命令: {command}", Colors.RED)
+                    print_colored(f"未知命令: {command}", Colors.RED)
                     print_colored("输入 /help 查看可用命令", Colors.YELLOW)
                 
                 continue
@@ -274,17 +274,17 @@ async def main():
             response = await session.chat(user_input)
             
             if not session.streaming:
-                print_colored(f"🤖 助手: {response}", Colors.BLUE)
+                print_colored(f"助手: {response}", Colors.BLUE)
             
             # 更新对话历史（简化版，不保存完整的 LangChain 消息）
             # 在实际应用中，应该保存完整的消息对象
             
         except KeyboardInterrupt:
-            print_colored("\n\n👋 检测到 Ctrl+C，正在退出...", Colors.CYAN)
+            print_colored("\n\n检测到 Ctrl+C，正在退出...", Colors.CYAN)
             break
         
         except Exception as e:
-            print_colored(f"\n❌ 错误: {e}", Colors.RED)
+            print_colored(f"\n错误: {e}", Colors.RED)
             logger.error(f"CLI 错误: {e}", exc_info=True)
 
 
@@ -297,8 +297,8 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print_colored("\n\n👋 再见！", Colors.CYAN)
+        print_colored("\n\n再见！", Colors.CYAN)
     except Exception as e:
-        print_colored(f"\n❌ 程序错误: {e}", Colors.RED)
+        print_colored(f"\n程序错误: {e}", Colors.RED)
         logger.error(f"程序错误: {e}", exc_info=True)
 

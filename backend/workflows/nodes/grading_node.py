@@ -70,7 +70,7 @@ def grading_node(state: StudyFlowState) -> Dict[str, Any]:
                 
             elif q_type == "fill_blank":
                 # 填空题：精确匹配（忽略大小写和首尾空格）
-                is_correct = user_answer.lower() == correct_answer.lower()
+                is_correct = user_answer.lower().strip() == correct_answer.lower().strip()
                 points_earned = points_possible if is_correct else 0
                 feedback = "回答正确！" if is_correct else f"回答错误。正确答案是：{correct_answer}"
                 
@@ -149,7 +149,7 @@ def grading_node(state: StudyFlowState) -> Dict[str, Any]:
         logger.info(f"[Grading Node] 评分完成: {score}分 ({correct_count}/{len(questions)} 题正确)")
         
         # 生成评分报告
-        grading_report = f"\n\n📊 **评分结果**\n\n"
+        grading_report = f"\n\n **评分结果**\n\n"
         grading_report += f"总分: {score} 分\n"
         grading_report += f"答对题数: {correct_count}/{len(questions)}\n"
         grading_report += f"实际得分: {total_earned}/{total_points}\n\n"

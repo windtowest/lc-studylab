@@ -4,6 +4,15 @@ langchain-core==1.0.3
 langchain-openai==1.0.2
 langchain-community==0.4.1
 
+# 智谱sdk
+zai-sdk==0.1.0
+
+# transformers相关包
+huggingface_hub==0.36.0
+transformers==4.57.3
+sentence-transformers==5.1.2
+
+
 # LangGraph - 用于构建复杂工作流
 langgraph==1.0.2
 langgraph-checkpoint-sqlite==3.0.0  # SQLite 检查点支持

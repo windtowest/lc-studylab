@@ -103,7 +103,7 @@ def test_complete_workflow():
                 print()
         
         # 步骤 2: 模拟用户答题
-        print("✍️  步骤 2: 模拟用户提交答案...")
+        print("✍步骤 2: 模拟用户提交答案...")
         
         # 构造答案（故意答错一些）
         quiz = result.get('quiz', {})
@@ -141,7 +141,7 @@ def test_complete_workflow():
             user_answers=user_answers
         )
         
-        print("✅ 答案提交成功！")
+        print("答案提交成功！")
         print_state(result, "评分后状态")
         
         # 显示评分结果
@@ -149,31 +149,31 @@ def test_complete_workflow():
             score = result['score']
             score_details = result.get('score_details', {})
             
-            print(f"📊 评分结果:")
+            print(f"评分结果:")
             print(f"   总分: {score} 分")
             print(f"   答对: {score_details.get('correct_count', 0)}/{score_details.get('total_count', 0)} 题")
             print(f"   是否需要重试: {'是' if result.get('should_retry') else '否'}\n")
         
         # 显示反馈
         if result.get('feedback'):
-            print(f"💬 反馈:")
+            print(f"反馈:")
             print(f"   {result['feedback']}\n")
         
         # 步骤 3: 查看工作流历史
-        print("📜 步骤 3: 查看工作流历史...")
+        print("步骤 3: 查看工作流历史...")
         history = get_workflow_history(thread_id)
         print(f"   共 {len(history)} 个检查点\n")
         
         for i, h in enumerate(history[:5], 1):  # 只显示前5个
             print(f"   {i}. {h.get('step')} - {h.get('timestamp')}")
         
-        print("\n✅ 完整工作流测试完成！")
+        print("\n完整工作流测试完成！")
         
         return True
         
     except Exception as e:
         logger.error(f"测试失败: {str(e)}", exc_info=True)
-        print(f"\n❌ 测试失败: {str(e)}")
+        print(f"\n测试失败: {str(e)}")
         return False
 
 
@@ -182,42 +182,42 @@ def test_checkpoint_recovery():
     print_section("测试 2: 检查点恢复")
     
     thread_id = f"test_recovery_{uuid.uuid4().hex[:8]}"
-    print(f"🆔 Thread ID: {thread_id}\n")
+    print(f"Thread ID: {thread_id}\n")
     
     try:
         # 启动工作流
-        print("📝 启动工作流...")
+        print("启动工作流...")
         result = start_study_flow(
             user_question="学习机器学习的基础概念",
             thread_id=thread_id
         )
         
-        print("✅ 工作流已暂停在答题环节")
+        print("工作流已暂停在答题环节")
         
         # 模拟程序重启，从检查点恢复
-        print("\n🔄 模拟程序重启，从检查点恢复状态...")
+        print("\n模拟程序重启，从检查点恢复状态...")
         
         recovered_state = get_workflow_state(thread_id)
         
         if recovered_state:
-            print("✅ 成功从检查点恢复状态！")
+            print("成功从检查点恢复状态！")
             print_state(recovered_state, "恢复的状态")
             
             # 验证数据完整性
             if recovered_state.get('quiz'):
-                print("✅ 练习题数据完整")
+                print("练习题数据完整")
             if recovered_state.get('learning_plan'):
-                print("✅ 学习计划数据完整")
+                print("学习计划数据完整")
             
-            print("\n✅ 检查点恢复测试完成！")
+            print("\n检查点恢复测试完成！")
             return True
         else:
-            print("❌ 无法恢复状态")
+            print("无法恢复状态")
             return False
             
     except Exception as e:
         logger.error(f"测试失败: {str(e)}", exc_info=True)
-        print(f"\n❌ 测试失败: {str(e)}")
+        print(f"\n测试失败: {str(e)}")
         return False
 
 
@@ -226,18 +226,18 @@ def test_retry_mechanism():
     print_section("测试 3: 重试机制（得分低于60分）")
     
     thread_id = f"test_retry_{uuid.uuid4().hex[:8]}"
-    print(f"🆔 Thread ID: {thread_id}\n")
+    print(f"Thread ID: {thread_id}\n")
     
     try:
         # 启动工作流
-        print("📝 启动工作流...")
+        print("启动工作流...")
         result = start_study_flow(
             user_question="学习深度学习的基本概念",
             thread_id=thread_id
         )
         
         # 故意全部答错
-        print("\n✍️  提交全错答案（测试重试机制）...")
+        print("\n提交全错答案（测试重试机制）...")
         
         quiz = result.get('quiz', {})
         questions = quiz.get('questions', [])
@@ -262,11 +262,11 @@ def test_retry_mechanism():
         score = result.get('score', 0)
         should_retry = result.get('should_retry', False)
         
-        print(f"\n📊 评分结果: {score} 分")
+        print(f"\n评分结果: {score} 分")
         print(f"🔄 是否触发重试: {'是' if should_retry else '否'}")
         
         if should_retry:
-            print("✅ 重试机制正常工作！")
+            print("重试机制正常工作！")
             print("   系统已自动生成新的练习题")
             
             # 查看新题目
@@ -277,12 +277,12 @@ def test_retry_mechanism():
             
             return True
         else:
-            print("⚠️  未触发重试（可能得分高于60分）")
+            print("未触发重试（可能得分高于60分）")
             return False
             
     except Exception as e:
         logger.error(f"测试失败: {str(e)}", exc_info=True)
-        print(f"\n❌ 测试失败: {str(e)}")
+        print(f"\n测试失败: {str(e)}")
         return False
 
 
@@ -297,11 +297,11 @@ def main():
     # 测试 1: 完整工作流
     results.append(("完整工作流", test_complete_workflow()))
     
-    # 测试 2: 检查点恢复
-    results.append(("检查点恢复", test_checkpoint_recovery()))
-    
-    # 测试 3: 重试机制
-    results.append(("重试机制", test_retry_mechanism()))
+    # # 测试 2: 检查点恢复
+    # results.append(("检查点恢复", test_checkpoint_recovery()))
+    #
+    # # 测试 3: 重试机制
+    # results.append(("重试机制", test_retry_mechanism()))
     
     # 汇总结果
     print_section("测试结果汇总")

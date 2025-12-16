@@ -79,7 +79,7 @@ def get_chat_model(
     model_config.update(kwargs)
     
     logger.info(
-        f"🤖 创建聊天模型: {model_name} "
+        f"创建聊天模型: {model_name} "
         f"(temperature={temperature}, streaming={streaming})"
     )
     
@@ -87,10 +87,10 @@ def get_chat_model(
     # 这里使用 LangChain 1.0.3 的标准接口
     try:
         model = ChatOpenAI(**model_config)
-        logger.debug(f"✅ 模型创建成功: {model_name}")
+        logger.info(f"模型创建成功: {model_name}")
         return model
     except Exception as e:
-        logger.error(f"❌ 模型创建失败: {e}")
+        logger.error(f"模型创建失败: {e}")
         raise
 
 
@@ -255,9 +255,13 @@ def get_model_string(
     参考：
         https://reference.langchain.com/python/langchain/models/
     """
-    model_name = model_name or settings.openai_model
+    model_name = model_name or settings.deepseek_model
     model_string = f"{provider}:{model_name}"
+
     
-    logger.debug(f"🔤 生成模型标识符: {model_string}")
+    logger.debug(f"生成模型标识符: {model_string}")
     return model_string
 
+
+if __name__ == "__main__":
+    get_chat_model()

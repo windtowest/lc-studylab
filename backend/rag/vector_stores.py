@@ -18,6 +18,8 @@ from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore, InMemoryVectorStore
 
+from rag.my_custom_emddings import MyCustomEmbeddings
+
 try:
     from langchain_community.vectorstores import FAISS
     FAISS_AVAILABLE = True
@@ -72,7 +74,7 @@ def create_vector_store(
     
     store_type = store_type or settings.vector_store_type
     
-    logger.info(f"🗄️  创建向量存储: type={store_type}, documents={len(documents)}")
+    logger.info(f"创建向量存储: type={store_type}, documents={len(documents)}")
     
     try:
         if store_type == "faiss":
@@ -80,13 +82,14 @@ def create_vector_store(
                 raise ImportError(
                     "FAISS 未安装。请运行: pip install faiss-cpu"
                 )
-            
+            logger.info("开始创建FAISS 向量库")
+            embeddings = MyCustomEmbeddings("/home/tianzuolin/models/qwen/qwen3-embedding-0.6b")
             vector_store = FAISS.from_documents(
                 documents=documents,
                 embedding=embeddings,
                 **kwargs,
             )
-            logger.info("✅ FAISS 向量库创建成功")
+            logger.info("FAISS 向量库创建成功")
             
         elif store_type == "inmemory":
             vector_store = InMemoryVectorStore.from_documents(
@@ -94,7 +97,7 @@ def create_vector_store(
                 embedding=embeddings,
                 **kwargs,
             )
-            logger.info("✅ 内存向量库创建成功")
+            logger.info("内存向量库创建成功")
             
         else:
             raise ValueError(
@@ -105,7 +108,7 @@ def create_vector_store(
         return vector_store
         
     except Exception as e:
-        logger.error(f"❌ 创建向量库失败: {e}")
+        logger.error(f"创建向量库失败: {e}")
         raise
 
 
@@ -134,25 +137,25 @@ def save_vector_store(
     # 确保目录存在
     save_path.parent.mkdir(parents=True, exist_ok=True)
     
-    logger.info(f"💾 保存向量库: {save_path}")
+    logger.info(f"保存向量库: {save_path}")
     
     try:
         if isinstance(vector_store, FAISS):
             # FAISS 支持本地保存
             vector_store.save_local(str(save_path))
-            logger.info("✅ FAISS 向量库保存成功")
+            logger.info("FAISS 向量库保存成功")
             
         elif isinstance(vector_store, InMemoryVectorStore):
             # InMemoryVectorStore 不支持持久化
-            logger.warning("⚠️  InMemoryVectorStore 不支持持久化")
+            logger.warning("InMemoryVectorStore 不支持持久化")
             raise ValueError("InMemoryVectorStore 不支持持久化")
             
         else:
-            logger.warning(f"⚠️  未知的向量库类型: {type(vector_store)}")
+            logger.warning(f"未知的向量库类型: {type(vector_store)}")
             raise ValueError(f"不支持的向量库类型: {type(vector_store)}")
             
     except Exception as e:
-        logger.error(f"❌ 保存向量库失败: {e}")
+        logger.error(f"保存向量库失败: {e}")
         raise
 
 
@@ -194,7 +197,7 @@ def load_vector_store(
     
     store_type = store_type or settings.vector_store_type
     
-    logger.info(f"📂 加载向量库: {load_path}")
+    logger.info(f"加载向量库: {load_path}")
     
     try:
         if store_type == "faiss":
@@ -209,7 +212,7 @@ def load_vector_store(
                 allow_dangerous_deserialization=True,  # 允许反序列化
                 **kwargs,
             )
-            logger.info("✅ FAISS 向量库加载成功")
+            logger.info("FAISS 向量库加载成功")
             
         elif store_type == "inmemory":
             raise ValueError("InMemoryVectorStore 不支持从磁盘加载")
@@ -223,7 +226,7 @@ def load_vector_store(
         return vector_store
         
     except Exception as e:
-        logger.error(f"❌ 加载向量库失败: {e}")
+        logger.error(f"加载向量库失败: {e}")
         raise
 
 
@@ -254,14 +257,14 @@ def add_documents_to_vector_store(
         logger.warning("文档列表为空，无需添加")
         return
     
-    logger.info(f"➕ 向向量库添加文档: {len(documents)} 个")
+    logger.info(f"向向量库添加文档: {len(documents)} 个")
     
     try:
         vector_store.add_documents(documents)
-        logger.info("✅ 文档添加成功")
+        logger.info("文档添加成功")
         
     except Exception as e:
-        logger.error(f"❌ 添加文档失败: {e}")
+        logger.error(f"添加文档失败: {e}")
         raise
 
 
@@ -294,15 +297,15 @@ def search_vector_store(
         ...     print(f"相似度: {score:.4f}")
         ...     print(f"内容: {doc.page_content[:100]}")
     """
-    logger.info(f"🔍 搜索向量库: query='{query[:50]}...', k={k}")
-    
+
     try:
         # 使用 similarity_search_with_score 获取相似度分数
+        logger.info(f"搜索向量库: query='{query[:50]}...', k={k}")
         results = vector_store.similarity_search_with_score(
             query=query,
             k=k,
         )
-        
+        logger.info("搜索结束")
         # 如果设置了阈值，过滤结果
         if score_threshold is not None:
             results = [
@@ -310,12 +313,12 @@ def search_vector_store(
                 if score >= score_threshold
             ]
         
-        logger.info(f"✅ 找到 {len(results)} 个相关文档")
+        logger.info(f"找到 {len(results)} 个相关文档")
         
         return results
         
     except Exception as e:
-        logger.error(f"❌ 搜索失败: {e}")
+        logger.error(f"搜索失败: {e}")
         raise
 
 
@@ -352,7 +355,7 @@ def get_vector_store_stats(vector_store: VectorStore) -> dict:
     except Exception as e:
         logger.warning(f"获取统计信息失败: {e}")
     
-    logger.info("📊 向量库统计:")
+    logger.info("向量库统计:")
     for key, value in stats.items():
         logger.info(f"   {key}: {value}")
     
@@ -375,7 +378,7 @@ def delete_vector_store(path: str) -> None:
         logger.warning(f"向量库不存在: {path}")
         return
     
-    logger.info(f"🗑️  删除向量库: {path}")
+    logger.info(f"删除向量库: {path}")
     
     try:
         # 删除目录及其内容
@@ -385,9 +388,24 @@ def delete_vector_store(path: str) -> None:
         else:
             path.unlink()
         
-        logger.info("✅ 向量库删除成功")
+        logger.info("向量库删除成功")
         
     except Exception as e:
-        logger.error(f"❌ 删除向量库失败: {e}")
+        logger.error(f"删除向量库失败: {e}")
         raise
 
+
+if __name__ == "__main__":
+    import faiss
+
+    # 尝试创建GPU资源，如果成功则说明GPU版本可用
+    try:
+        print(f"Faiss 编译选项: {faiss.get_compile_options()}")
+        res = faiss.StandardGpuResources()
+        print("FAISS GPU 版本安装成功。")
+        # 进一步测试将CPU索引转移到GPU
+        index_cpu = faiss.IndexFlatL2(128)  # 以一个128维的索引为例
+        index_gpu = faiss.index_cpu_to_gpu(res, 0, index_cpu)
+        print("GPU索引创建测试通过。")
+    except Exception as e:
+        print(f"GPU资源创建失败: {e}")

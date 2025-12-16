@@ -45,6 +45,7 @@ SUPPORTED_EXTENSIONS = {
 }
 
 
+
 def get_supported_extensions() -> Dict[str, str]:
     """
     获取支持的文件扩展名
@@ -154,7 +155,8 @@ def load_document(
     
     # 加载文档
     try:
-        logger.info(f"📄 加载文档: {file_path}")
+        logger.info(f"加载文档: {file_path}")
+        logger.info(f"加载器类型为: {type(loader)}" )
         documents = loader.load()
         
         # 添加额外的元数据
@@ -168,11 +170,11 @@ def load_document(
                     "file_type": SUPPORTED_EXTENSIONS[file_path.suffix.lower()],
                 })
         
-        logger.info(f"✅ 成功加载 {len(documents)} 个文档块")
+        logger.info(f"成功加载 {len(documents)} 个文档块")
         return documents
         
     except Exception as e:
-        logger.error(f"❌ 加载文档失败: {file_path}, 错误: {e}")
+        logger.error(f"加载文档失败: {file_path}, 错误: {e}")
         raise
 
 
@@ -225,7 +227,7 @@ def load_directory(
     if not directory_path.is_dir():
         raise ValueError(f"不是目录: {directory_path}")
     
-    logger.info(f"📁 开始加载目录: {directory_path}")
+    logger.info(f"开始加载目录: {directory_path}")
     logger.info(f"   匹配模式: {glob_pattern}")
     if exclude_patterns:
         logger.info(f"   排除模式: {exclude_patterns}")
@@ -252,7 +254,7 @@ def load_directory(
     
     # 限制文件数量
     if max_files is not None and len(all_files) > max_files:
-        logger.warning(f"⚠️  文件数量 ({len(all_files)}) 超过限制 ({max_files})，只加载前 {max_files} 个")
+        logger.warning(f"文件数量 ({len(all_files)}) 超过限制 ({max_files})，只加载前 {max_files} 个")
         all_files = all_files[:max_files]
     
     logger.info(f"   找到 {len(all_files)} 个文件")
@@ -272,11 +274,11 @@ def load_directory(
             success_count += 1
             
         except Exception as e:
-            logger.error(f"   ❌ 加载失败: {file_path.name}, 错误: {e}")
+            logger.error(f"   加载失败: {file_path.name}, 错误: {e}")
             error_count += 1
             continue
     
-    logger.info(f"✅ 目录加载完成:")
+    logger.info(f"目录加载完成:")
     logger.info(f"   成功: {success_count} 个文件")
     logger.info(f"   失败: {error_count} 个文件")
     logger.info(f"   总计: {len(all_documents)} 个文档块")
@@ -302,7 +304,7 @@ def load_documents_from_paths(
         >>> paths = ["doc1.pdf", "doc2.md", "doc3.txt"]
         >>> documents = load_documents_from_paths(paths)
     """
-    logger.info(f"📚 开始加载 {len(file_paths)} 个文件")
+    logger.info(f"开始加载 {len(file_paths)} 个文件")
     
     all_documents = []
     success_count = 0
@@ -318,14 +320,22 @@ def load_documents_from_paths(
             success_count += 1
             
         except Exception as e:
-            logger.error(f"   ❌ 加载失败: {file_path}, 错误: {e}")
+            logger.error(f"   加载失败: {file_path}, 错误: {e}")
             error_count += 1
             continue
     
-    logger.info(f"✅ 批量加载完成:")
+    logger.info(f"批量加载完成:")
     logger.info(f"   成功: {success_count} 个文件")
     logger.info(f"   失败: {error_count} 个文件")
     logger.info(f"   总计: {len(all_documents)} 个文档块")
     
     return all_documents
 
+if __name__ == "__main__":
+    import nltk
+    import os
+
+    os.environ['NLTK_DATA'] = 'https://mirrors.tuna.tsinghua.edu.cn/nltk_data/'
+
+    # 下载数据
+    nltk.download('all')

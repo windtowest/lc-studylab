@@ -161,7 +161,7 @@ def split_documents(
         logger.warning("文档列表为空，无需分块")
         return []
     
-    logger.info(f"📝 开始分块: {len(documents)} 个文档")
+    logger.info(f"开始分块: {len(documents)} 个文档")
     
     # 获取分块器
     splitter = get_text_splitter(
@@ -175,7 +175,7 @@ def split_documents(
     try:
         chunks = splitter.split_documents(documents)
         
-        logger.info(f"✅ 分块完成: {len(chunks)} 个文本块")
+        logger.info(f"分块完成: {len(chunks)} 个文本块")
         
         # 统计信息
         total_chars = sum(len(chunk.page_content) for chunk in chunks)
@@ -187,7 +187,7 @@ def split_documents(
         return chunks
         
     except Exception as e:
-        logger.error(f"❌ 分块失败: {e}")
+        logger.error(f"分块失败: {e}")
         raise
 
 
@@ -225,7 +225,7 @@ def split_text(
         logger.warning("文本为空，无需分块")
         return []
     
-    logger.info(f"📝 开始分块文本: {len(text)} 字符")
+    logger.info(f"开始分块文本: {len(text)} 字符")
     
     # 获取分块器
     splitter = get_text_splitter(
@@ -244,12 +244,12 @@ def split_text(
             metadatas=metadatas,
         )
         
-        logger.info(f"✅ 分块完成: {len(chunks)} 个文本块")
+        logger.info(f"分块完成: {len(chunks)} 个文本块")
         
         return chunks
         
     except Exception as e:
-        logger.error(f"❌ 分块失败: {e}")
+        logger.error(f"分块失败: {e}")
         raise
 
 
@@ -294,7 +294,7 @@ def get_optimal_chunk_size(
     
     chunk_size, overlap = recommendations[document_type]
     logger.info(
-        f"📊 推荐的分块参数 ({document_type}): "
+        f"推荐的分块参数 ({document_type}): "
         f"chunk_size={chunk_size}, overlap={overlap}"
     )
     
@@ -336,7 +336,7 @@ def analyze_chunks(chunks: List[Document]) -> dict:
         "max_chunk_size": max(chunk_sizes),
     }
     
-    logger.info("📊 分块统计:")
+    logger.info("分块统计:")
     logger.info(f"   总块数: {stats['total_chunks']}")
     logger.info(f"   总字符数: {stats['total_chars']}")
     logger.info(f"   平均大小: {stats['avg_chunk_size']:.0f} 字符")

@@ -32,7 +32,7 @@ def get_current_time() -> str:
         - **不要**在查询天气前调用此工具
     """
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    logger.debug(f"🕐 获取当前时间: {current_time}")
+    logger.debug(f"获取当前时间: {current_time}")
     return f"当前时间是：{current_time}"
 
 
@@ -72,6 +72,6 @@ def get_current_date() -> str:
     weekday = weekday_map[now.weekday()]
     
     result = f"{date_str} ({weekday})"
-    logger.debug(f"📅 获取当前日期: {result}")
+    logger.debug(f"获取当前日期: {result}")
     return f"今天是：{result}"
 

@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from typing import Dict, Any
 from pydantic import BaseModel, Field
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 from ..state import StudyFlowState, LearningPlan
 from core.models import get_chat_model
@@ -46,6 +46,7 @@ def planner_node(state: StudyFlowState) -> Dict[str, Any]:
     try:
         # 获取聊天模型，使用结构化输出
         model = get_chat_model()
+        # 使用chatOpenai创建的deepseek-chat模型不支持.with_structured_output
         structured_model = model.with_structured_output(LearningPlanSchema)
         
         # 构建提示词
@@ -70,7 +71,6 @@ def planner_node(state: StudyFlowState) -> Dict[str, Any]:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ])
-        
         # 转换为字典格式
         learning_plan: LearningPlan = {
             "topic": plan_response.topic,
@@ -86,16 +86,16 @@ def planner_node(state: StudyFlowState) -> Dict[str, Any]:
         # 构建 AI 消息
         plan_summary = f"""已为您制定学习计划：
 
-📚 **学习主题**: {learning_plan['topic']}
+ **学习主题**: {learning_plan['topic']}
 
-🎯 **学习目标**:
+ **学习目标**:
 {chr(10).join(f"{i+1}. {obj}" for i, obj in enumerate(learning_plan['objectives']))}
 
 💡 **关键知识点**:
 {chr(10).join(f"• {point}" for point in learning_plan['key_points'])}
 
-📊 **难度级别**: {learning_plan['difficulty']}
-⏱️ **预计时间**: {learning_plan['estimated_time']} 分钟
+ **难度级别**: {learning_plan['difficulty']}
+ **预计时间**: {learning_plan['estimated_time']} 分钟
 """
         
         # 更新状态

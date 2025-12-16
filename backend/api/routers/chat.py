@@ -18,6 +18,7 @@ import asyncio
 import time
 
 from agents import create_base_agent
+from core.my_llm import my_deepseek
 from core.tools import BASIC_TOOLS, WEB_SEARCH_TOOLS, WEATHER_TOOLS
 from deep_research import create_deep_research_agent
 from config import settings, get_logger
@@ -135,15 +136,15 @@ def get_tools_for_request(use_tools: bool, use_advanced_tools: bool) -> List:
             if tool not in tools:
                 tools.append(tool)
     else:
-        logger.debug("🌤️ 未配置 AMAP_KEY，天气工具不可用")
-    
-    # 默认启用 Tavily 搜索（只要配置了 API Key）
-    if settings.tavily_api_key:
+        logger.debug("未配置 AMAP_KEY，天气工具不可用")
+
+    # 默认启用智谱搜索(只要配置了api_key)
+    if settings.zhipu_api_key:
         for tool in WEB_SEARCH_TOOLS:
             if tool not in tools:
                 tools.append(tool)
     else:
-        logger.debug("🌐 未配置 Tavily API Key，网络搜索工具不可用")
+        logger.debug("未配置 zhipu API Key，网络搜索工具不可用")
     
     return tools
 
@@ -202,8 +203,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
           }'
         ```
     """
-    logger.info(f"📨 收到聊天请求: {request.message[:50]}...")
-    logger.debug(f"   模式: {request.mode}, 工具: {request.use_tools}")
+    logger.info(f"收到聊天请求: {request.message[:50]}...")
+    logger.debug(f"模式: {request.mode}, 工具: {request.use_tools}")
     
     try:
         # 获取工具列表
@@ -211,6 +212,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         
         # 创建 Agent
         agent = create_base_agent(
+            model=my_deepseek,
             tools=tools,
             prompt_mode=request.mode,
             # streaming=False,  # 非流式接口
@@ -254,7 +256,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         # 构建响应
         tool_names = [tool.name for tool in tools]
         
-        logger.info(f"✅ 聊天请求处理完成，响应长度: {len(response)} 字符")
+        logger.info(f"聊天请求处理完成，响应长度: {len(response)} 字符")
         
         return ChatResponse(
             message=response,
@@ -265,7 +267,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         
     except Exception as e:
         error_msg = f"处理聊天请求时出错: {str(e)}"
-        logger.error(f"❌ {error_msg}")
+        logger.error(f"{error_msg}")
         
         return ChatResponse(
             message="抱歉，处理您的请求时出现错误。",
@@ -308,7 +310,7 @@ async def chat_stream(request: ChatRequest):
         data: {"type": "end", "message": "生成完成"}
         ```
     """
-    logger.info(f"🌊 收到流式聊天请求: {request.message[:50]}...")
+    logger.info(f"收到流式聊天请求: {request.message[:50]}...")
     
     async def generate():
         """SSE 生成器函数 - 增强版"""
@@ -328,7 +330,7 @@ async def chat_stream(request: ChatRequest):
 
             # 如果问题需要深度研究，优先走 DeepResearch 流程
             if should_use_deep_research(request.message):
-                logger.info("🧠 触发深度研究流程，交给 DeepResearchAgent 处理")
+                logger.info("触发深度研究流程，交给 DeepResearchAgent 处理")
                 
                 reasoning_event = {
                     "type": "reasoning",
@@ -361,7 +363,7 @@ async def chat_stream(request: ChatRequest):
                 yield f"data: {json.dumps({'type': 'end', 'message': '生成完成'}, ensure_ascii=False)}\n\n"
                 
                 usage_tracker.log_summary()
-                logger.info("✅ 深度研究流程完成")
+                logger.info("深度研究流程完成")
                 return
             
             # 获取工具列表
@@ -435,7 +437,7 @@ async def chat_stream(request: ChatRequest):
                             
                             # 如果同一个工具被调用超过 3 次，记录警告
                             if tool_call_count[tool_name] > 3:
-                                logger.warning(f"⚠️ 工具 {tool_name} 被调用了 {tool_call_count[tool_name]} 次，可能存在循环调用")
+                                logger.warning(f"工具 {tool_name} 被调用了 {tool_call_count[tool_name]} 次，可能存在循环调用")
                             
                             tool_info = {
                                 "id": tool_id,
@@ -553,7 +555,7 @@ async def chat_stream(request: ChatRequest):
                                     "content": result_content,
                                 }
                                 yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
-                                logger.info(f"✅ 使用工具 {tool_name} 的结果作为最终回复")
+                                logger.info(f"使用工具 {tool_name} 的结果作为最终回复")
                                 break
                     else:
                         continue
@@ -649,11 +651,11 @@ async def chat_stream(request: ChatRequest):
             
             # 打印统计
             usage_tracker.log_summary()
-            logger.info("✅ 流式聊天请求处理完成")
+            logger.info("流式聊天请求处理完成")
             
         except Exception as e:
             error_msg = f"流式处理出错: {str(e)}"
-            logger.error(f"❌ {error_msg}")
+            logger.error(f"{error_msg}")
             logger.exception(e)
             
             # 发送错误事件

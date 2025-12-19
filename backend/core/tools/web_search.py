@@ -27,7 +27,8 @@ def zhipu_web_search(query: str) -> str:
     try:
         res = zhipuClient.web_search.web_search(
             search_query=query,
-            search_engine="search_pro"
+            search_engine="search_pro",
+            count= settings.zhipu_max_results # 返回结果的条数
         )
 
         if res.search_result :
@@ -42,16 +43,16 @@ def zhipu_web_search(query: str) -> str:
 try:
     from langchain_tavily import TavilySearchResults as TavilySearch
     USING_NEW_TAVILY = True
-    logger.info("✅ 使用新的 langchain-tavily 包")
+    logger.info("使用新的 langchain-tavily 包")
 except ImportError:
     try:
         from langchain_community.tools.tavily_search import TavilySearchResults as TavilySearch
         USING_NEW_TAVILY = False
-        logger.warning("⚠️ 使用旧的 langchain-community Tavily（已弃用），建议安装: pip install langchain-tavily")
+        logger.warning("使用旧的 langchain-community Tavily（已弃用），建议安装: pip install langchain-tavily")
     except ImportError:
         TavilySearch = None
         USING_NEW_TAVILY = False
-        logger.error("❌ 未安装 Tavily 搜索工具，请安装: pip install langchain-tavily")
+        logger.error("未安装 Tavily 搜索工具，请安装: pip install langchain-tavily")
 
 
 def create_tavily_search_tool(
@@ -97,7 +98,7 @@ def create_tavily_search_tool(
     max_results = max_results or settings.tavily_max_results
     
     logger.info(
-        f"🔍 创建 Tavily 搜索工具 (max_results={max_results}, depth={search_depth})"
+        f"创建 Tavily 搜索工具 (max_results={max_results}, depth={search_depth})"
     )
     
     # 根据使用的包版本构建参数
@@ -127,7 +128,7 @@ def create_tavily_search_tool(
         tool = TavilySearch(**tool_kwargs)
         return tool
     except Exception as e:
-        logger.error(f"❌ 创建 Tavily 工具失败: {e}")
+        logger.error(f"创建 Tavily 工具失败: {e}")
         raise
 
 
@@ -155,12 +156,12 @@ def web_search(query: str) -> str:
         
         2. ...'
     """
-    logger.info(f"🔍 执行网络搜索: {query}")
+    logger.info(f"执行网络搜索: {query}")
     
     try:
         # 检查 API Key
         if not settings.tavily_api_key:
-            logger.warning("⚠️ Tavily API Key 未设置，无法执行搜索")
+            logger.warning("Tavily API Key 未设置，无法执行搜索")
             return (
                 "抱歉，网络搜索功能暂时不可用（未配置 Tavily API Key）。"
                 "请在 .env 文件中设置 TAVILY_API_KEY。"
@@ -174,7 +175,7 @@ def web_search(query: str) -> str:
         
         # 格式化结果
         if not results:
-            logger.info("📭 未找到搜索结果")
+            logger.info("未找到搜索结果")
             return f"未找到关于 '{query}' 的相关信息。"
         
         # 构建格式化的搜索结果
@@ -197,13 +198,13 @@ def web_search(query: str) -> str:
                 formatted_results.append(f"   来源: {url}")
         
         result_text = "\n".join(formatted_results)
-        logger.info(f"✅ 搜索完成，找到 {len(results)} 条结果")
+        logger.info(f"搜索完成，找到 {len(results)} 条结果")
         
         return result_text
         
     except Exception as e:
         error_msg = f"搜索时发生错误: {str(e)}"
-        logger.error(f"❌ {error_msg}")
+        logger.error(f"{error_msg}")
         return f"抱歉，{error_msg}"
 
 

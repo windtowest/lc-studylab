@@ -70,3 +70,5 @@ tmp/
 temp/
 *.tmp
 
+.langgraph_api
+./deep_research/langsmith_studio_graph.py

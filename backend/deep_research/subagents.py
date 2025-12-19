@@ -26,7 +26,9 @@ from langchain_core.language_models.chat_models import BaseChatModel
 
 from config import settings, get_logger
 from core.models import get_model_string
+from core.my_llm import my_deepseek
 from core.prompts import WRITER_GUIDELINES
+from core.tools import zhipu_web_search
 from core.tools.web_search import create_tavily_search_tool
 from core.tools.filesystem import FILESYSTEM_TOOLS
 
@@ -69,48 +71,49 @@ def create_web_researcher(
 ):
     """
     创建网络研究员子智能体
-    
+
     专门负责网络搜索和信息整理。
-    
+
     Args:
         model: 模型字符串（如 "openai:gpt-4o"）
         tools: 工具列表，默认包含搜索和文件系统工具
         **kwargs: 其他传递给 create_agent 的参数
-        
+
     Returns:
         WebResearcher Agent
-        
+
     Example:
         >>> researcher = create_web_researcher()
         >>> result = researcher.invoke({
         ...     "messages": [{"role": "user", "content": "搜索 LangChain 1.0 的新特性"}]
         ... })
     """
-    logger.info("🔍 创建 WebResearcher 子智能体")
-    
+    logger.info("创建 WebResearcher 子智能体")
+
     # 使用默认模型
     if model is None:
-        model = get_model_string()
-    
+        # model = get_model_string()
+        model = my_deepseek
     # 配置工具：搜索 + 文件系统
     if tools is None:
         agent_tools = []
-        
+
         # 添加搜索工具
         try:
-            if settings.tavily_api_key:
-                search_tool = create_tavily_search_tool()
-                agent_tools.append(search_tool)
-                logger.debug("   添加 Tavily 搜索工具")
+            if settings.zhipu_api_key:
+                # search_tool = create_tavily_search_tool()
+                # agent_tools.append(search_tool)
+                agent_tools.append(zhipu_web_search)
+                logger.debug("   添加 智谱ai 搜索工具")
         except Exception as e:
-            logger.warning(f"⚠️ 无法添加搜索工具: {e}")
-        
+            logger.warning(f"无法添加搜索工具: {e}")
+
         # 添加文件系统工具
         agent_tools.extend(FILESYSTEM_TOOLS)
         logger.debug(f"   添加文件系统工具: {len(FILESYSTEM_TOOLS)} 个")
-        
+
         tools = agent_tools
-    
+
     # 创建 Agent
     agent = create_agent(
         model=model,
@@ -118,8 +121,8 @@ def create_web_researcher(
         system_prompt=f"{WEB_RESEARCHER_PROMPT}\n\n{WRITER_GUIDELINES}",
         **kwargs,
     )
-    
-    logger.info("✅ WebResearcher 创建成功")
+
+    logger.info("WebResearcher 创建成功")
     return agent
 
 
@@ -131,18 +134,18 @@ def create_doc_analyst(
 ):
     """
     创建文档分析师子智能体
-    
+
     专门负责文档分析和知识提取。
-    
+
     Args:
         model: 模型字符串
         tools: 工具列表，默认包含 RAG 检索和文件系统工具
         retriever_tool: RAG 检索工具（可选）
         **kwargs: 其他参数
-        
+
     Returns:
         DocAnalyst Agent
-        
+
     Example:
         >>> from rag import create_retriever_tool, get_embeddings, load_vector_store
         >>> 
@@ -155,12 +158,12 @@ def create_doc_analyst(
         >>> # 创建文档分析师
         >>> analyst = create_doc_analyst(retriever_tool=retriever_tool)
     """
-    logger.info("📚 创建 DocAnalyst 子智能体")
+    logger.info("创建 DocAnalyst 子智能体")
     
     # 使用默认模型
     if model is None:
-        model = get_model_string()
-    
+        # model = get_model_string()
+        model = my_deepseek
     # 配置工具：RAG 检索 + 文件系统
     if tools is None:
         agent_tools = []
@@ -170,7 +173,7 @@ def create_doc_analyst(
             agent_tools.append(retriever_tool)
             logger.debug("   添加 RAG 检索工具")
         else:
-            logger.warning("⚠️ 未提供 retriever_tool，DocAnalyst 将无法检索文档")
+            logger.warning("未提供 retriever_tool，DocAnalyst 将无法检索文档")
         
         # 添加文件系统工具
         agent_tools.extend(FILESYSTEM_TOOLS)
@@ -186,7 +189,7 @@ def create_doc_analyst(
         **kwargs,
     )
     
-    logger.info("✅ DocAnalyst 创建成功")
+    logger.info("DocAnalyst 创建成功")
     return agent
 
 
@@ -217,13 +220,13 @@ def create_report_writer(
         ...     }]
         ... })
     """
-    logger.info("✍️ 创建 ReportWriter 子智能体")
+    logger.info("创建 ReportWriter 子智能体")
     
     # 使用默认模型（可以使用更强大的模型）
     if model is None:
         # ReportWriter 使用主模型，确保报告质量
-        model = f"openai:{settings.openai_model}"
-    
+        # model = f"openai:{settings.openai_model}"
+        model = my_deepseek
     # 配置工具：只需要文件系统工具
     if tools is None:
         tools = FILESYSTEM_TOOLS
@@ -237,7 +240,7 @@ def create_report_writer(
         **kwargs,
     )
     
-    logger.info("✅ ReportWriter 创建成功")
+    logger.info("ReportWriter 创建成功")
     return agent
 
 
@@ -260,7 +263,7 @@ def get_subagent_info() -> dict:
                 "来源评估",
                 "笔记整理"
             ],
-            "tools": ["tavily_search", "write_research_file", "read_research_file"]
+            "tools": ["zhipu_web_search", "write_research_file", "read_research_file"]
         },
         "doc_analyst": {
             "name": "DocAnalyst",
@@ -287,4 +290,4 @@ def get_subagent_info() -> dict:
     }
 
 
-logger.info("✅ SubAgents 模块已加载")
+logger.info("SubAgents 模块已加载")

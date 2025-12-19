@@ -30,6 +30,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.sqlite import SqliteSaver
 
+from core.my_llm import my_deepseek
 from config import settings, get_logger
 from core.models import get_chat_model
 from core.tools.filesystem import get_filesystem, ResearchFileSystem
@@ -131,7 +132,7 @@ class DeepResearchAgent:
         self.enable_web_search = enable_web_search
         self.enable_doc_analysis = enable_doc_analysis
         
-        logger.info(f"🚀 初始化 DeepResearchAgent: {thread_id}")
+        logger.info(f"初始化 DeepResearchAgent: {thread_id}")
         logger.info(f"   网络搜索: {enable_web_search}")
         logger.info(f"   文档分析: {enable_doc_analysis}")
         
@@ -144,7 +145,7 @@ class DeepResearchAgent:
         # 创建工作流
         self.graph = self._build_graph(checkpointer)
         
-        logger.info("✅ DeepResearchAgent 初始化完成")
+        logger.info("DeepResearchAgent 初始化完成")
     
     def _init_subagents(self, retriever_tool: Optional[BaseTool] = None) -> None:
         """
@@ -153,7 +154,7 @@ class DeepResearchAgent:
         Args:
             retriever_tool: RAG 检索工具
         """
-        logger.info("🤖 初始化子智能体...")
+        logger.info("初始化子智能体...")
         
         # WebResearcher
         if self.enable_web_search:
@@ -166,7 +167,7 @@ class DeepResearchAgent:
         # DocAnalyst
         if self.enable_doc_analysis:
             if retriever_tool is None:
-                logger.warning("⚠️ 启用了文档分析但未提供 retriever_tool")
+                logger.warning("启用了文档分析但未提供 retriever_tool")
             self.doc_analyst = create_doc_analyst(retriever_tool=retriever_tool)
             logger.debug("   ✓ DocAnalyst")
         else:
@@ -187,7 +188,7 @@ class DeepResearchAgent:
         Returns:
             编译后的 StateGraph
         """
-        logger.info("🔨 构建研究工作流...")
+        logger.info("构建研究工作流...")
         
         # 创建 StateGraph
         workflow = StateGraph(ResearchState)
@@ -232,7 +233,7 @@ class DeepResearchAgent:
         
         graph = workflow.compile(checkpointer=checkpointer)
         
-        logger.info("✅ 工作流构建完成")
+        logger.info("工作流构建完成")
         return graph
     
     # ==================== 节点函数 ====================
@@ -247,7 +248,7 @@ class DeepResearchAgent:
         Returns:
             更新后的状态
         """
-        logger.info("📋 执行规划节点...")
+        logger.info("执行规划节点...")
         
         query = state["query"]
         thread_id = state["thread_id"]
@@ -272,7 +273,8 @@ class DeepResearchAgent:
         
         # 使用 LLM 生成计划
         try:
-            model = get_chat_model()
+            # model = get_chat_model()
+            model = my_deepseek
             response = model.invoke([HumanMessage(content=plan_prompt)])
             
             # 解析 JSON
@@ -317,15 +319,15 @@ class DeepResearchAgent:
                 subdirectory="plans"
             )
             
-            logger.info("✅ 研究计划已生成")
+            logger.info("研究计划已生成")
             
             # 更新状态
             state["plan"] = plan
             state["current_step"] = "planner"
-            state["messages"].append(AIMessage(content=f"研究计划已生成：{plan.get('research_goal')}"))
+            state["messages"] = [AIMessage(content=f"研究计划已生成：{plan.get('research_goal')}")]
             
         except Exception as e:
-            logger.error(f"❌ 生成计划失败: {e}")
+            logger.error(f"生成计划失败: {e}")
             state["error"] = str(e)
             state["plan"] = {"research_goal": query}
         
@@ -341,7 +343,7 @@ class DeepResearchAgent:
         Returns:
             更新后的状态
         """
-        logger.info("🔍 执行网络研究节点...")
+        logger.info("执行网络研究节点...")
         
         query = state["query"]
         thread_id = state["thread_id"]
@@ -380,9 +382,9 @@ thread_id: {thread_id}
             try:
                 notes = self.filesystem.read_file("web_research.md", subdirectory="notes")
                 notes_saved = True
-                logger.info("✅ 网络研究笔记已保存")
+                logger.info("网络研究笔记已保存")
             except Exception:
-                logger.debug("   未在文件系统中找到笔记，尝试从 Agent 输出提取...")
+                logger.info("   未在文件系统中找到笔记，尝试从 Agent 输出提取...")
             
             # 如果笔记没有保存，尝试从 Agent 输出中提取
             if not notes_saved:
@@ -423,19 +425,19 @@ thread_id: {thread_id}
                                 subdirectory="notes",
                                 metadata={"source": "agent_output_extraction"}
                             )
-                            logger.info("✅ 已从 Agent 输出提取并保存研究笔记")
+                            logger.info("已从 Agent 输出提取并保存研究笔记")
                         except Exception as save_error:
-                            logger.error(f"❌ 保存提取的笔记失败: {save_error}")
+                            logger.error(f"保存提取的笔记失败: {save_error}")
             
-            logger.info("✅ 网络研究完成")
+            logger.info("网络研究完成")
             
             # 更新状态
             state["web_research_done"] = True
             state["current_step"] = "web_research"
-            state["messages"].append(AIMessage(content="网络研究已完成"))
+            state["messages"] = [AIMessage(content="网络研究已完成")]
             
         except Exception as e:
-            logger.error(f"❌ 网络研究失败: {e}")
+            logger.error(f"网络研究失败: {e}")
             state["error"] = str(e)
         
         return state
@@ -450,7 +452,7 @@ thread_id: {thread_id}
         Returns:
             更新后的状态
         """
-        logger.info("📚 执行文档分析节点...")
+        logger.info("执行文档分析节点...")
         
         query = state["query"]
         thread_id = state["thread_id"]
@@ -486,15 +488,15 @@ thread_id: {thread_id}
                 "messages": [HumanMessage(content=analysis_instruction)]
             })
             
-            logger.info("✅ 文档分析完成")
+            logger.info("文档分析完成")
             
             # 更新状态
             state["doc_analysis_done"] = True
             state["current_step"] = "doc_analysis"
-            state["messages"].append(AIMessage(content="文档分析已完成"))
+            state["messages"] = [AIMessage(content="文档分析已完成")]
             
         except Exception as e:
-            logger.error(f"❌ 文档分析失败: {e}")
+            logger.error(f"文档分析失败: {e}")
             state["error"] = str(e)
         
         return state
@@ -509,7 +511,7 @@ thread_id: {thread_id}
         Returns:
             更新后的状态
         """
-        logger.info("✍️ 执行报告撰写节点...")
+        logger.info("执行报告撰写节点...")
         
         query = state["query"]
         thread_id = state["thread_id"]
@@ -547,13 +549,13 @@ thread_id: {thread_id}
                     "final_report.md",
                     subdirectory="reports"
                 )
-                logger.info("✅ 从文件系统读取最终报告")
+                logger.info("从文件系统读取最终报告")
             except Exception as e:
                 logger.debug(f"   无法从文件系统读取: {e}")
             
             # 2. 如果文件系统没有，尝试从 Agent 的输出中提取
             if not final_report:
-                logger.info("📝 从 Agent 输出中提取报告内容...")
+                logger.info("从 Agent 输出中提取报告内容...")
                 
                 # 从 result 中提取 AI 消息
                 if isinstance(result, dict) and "messages" in result:
@@ -582,7 +584,7 @@ thread_id: {thread_id}
                         
                         if is_report:
                             final_report = content
-                            logger.info(f"✅ 从 Agent 输出中提取到报告（长度: {len(content)} 字符）")
+                            logger.info(f"从 Agent 输出中提取到报告（长度: {len(content)} 字符）")
                             
                             # 保存到文件系统
                             try:
@@ -592,15 +594,15 @@ thread_id: {thread_id}
                                     subdirectory="reports",
                                     metadata={"source": "agent_output"}
                                 )
-                                logger.info("✅ 报告已保存到文件系统")
+                                logger.info("报告已保存到文件系统")
                             except Exception as save_error:
-                                logger.warning(f"⚠️ 保存报告失败: {save_error}")
+                                logger.warning(f"保存报告失败: {save_error}")
                             
                             break
             
             # 3. 如果还是没有，生成综合报告
             if not final_report:
-                logger.info("📋 Agent 未直接生成报告，使用研究材料生成综合报告")
+                logger.info("Agent 未直接生成报告，使用研究材料生成综合报告")
                 
                 # 读取所有可用的研究材料
                 research_materials = []
@@ -694,9 +696,9 @@ thread_id: {thread_id}
                             "materials_count": len(research_materials)
                         }
                     )
-                    logger.info("✅ 基础报告已生成并保存")
+                    logger.info("基础报告已生成并保存")
                 except Exception as save_error:
-                    logger.error(f"❌ 保存基础报告失败: {save_error}")
+                    logger.error(f"保存基础报告失败: {save_error}")
             
             is_technical = any(w in query.lower() for w in ["react", "hook", "api", "编程", "代码", "javascript", "python"])            
             validator = OutputValidator(require_examples=is_technical)
@@ -704,7 +706,7 @@ thread_id: {thread_id}
             if not result.is_valid:
                 try:
                     revision_prompt = f"请在保持现有结构与引用的前提下，补充示例或代码片段，并提升信息密度与可操作性。\n\n写作准则：\n{WRITER_GUIDELINES}\n\n原文：\n{final_report}"
-                    model = get_chat_model()
+                    model = my_deepseek
                     revised = model.invoke([HumanMessage(content=revision_prompt)])
                     revised_text = revised.content or final_report
                     final_report = revised_text
@@ -720,12 +722,12 @@ thread_id: {thread_id}
             state["final_report"] = final_report
             state["report_done"] = True
             state["current_step"] = "report_writing"
-            state["messages"].append(AIMessage(content="最终报告已完成"))
+            state["messages"] = [AIMessage(content="最终报告已完成")]
             
-            logger.info("✅ 报告撰写节点完成")
+            logger.info("报告撰写节点完成")
             
         except Exception as e:
-            logger.error(f"❌ 报告撰写失败: {e}")
+            logger.error(f"报告撰写失败: {e}")
             state["error"] = str(e)
         
         return state
@@ -752,7 +754,7 @@ thread_id: {thread_id}
             >>> result = agent.research("分析 LangChain 1.0 的新特性")
             >>> print(result["final_report"])
         """
-        logger.info(f"🚀 开始研究任务: {query}")
+        logger.info(f"开始研究任务: {query}")
         
         # 初始化状态
         initial_state: ResearchState = {
@@ -775,7 +777,7 @@ thread_id: {thread_id}
             
             final_state = self.graph.invoke(initial_state, config)
             
-            logger.info("✅ 研究任务完成")
+            logger.info("研究任务完成")
             
             # 返回结果
             return {
@@ -793,7 +795,7 @@ thread_id: {thread_id}
             }
             
         except Exception as e:
-            logger.error(f"❌ 研究任务失败: {e}")
+            logger.error(f"研究任务失败: {e}")
             return {
                 "status": "failed",
                 "query": query,
@@ -859,4 +861,4 @@ def create_deep_research_agent(
     )
 
 
-logger.info("✅ DeepAgent 模块已加载")
+logger.info("DeepAgent 模块已加载")

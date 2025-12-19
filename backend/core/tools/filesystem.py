@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from langchain_core.tools import tool
+from sqlalchemy import True_
 
 from config import settings, get_logger
 
@@ -81,7 +82,7 @@ class ResearchFileSystem:
         # 创建必要的目录结构
         self._init_workspace()
         
-        logger.info(f"📁 初始化研究文件系统: {self.workspace_path}")
+        logger.info(f"初始化研究文件系统: {self.workspace_path}")
     
     def _init_workspace(self) -> None:
         """
@@ -158,11 +159,11 @@ class ResearchFileSystem:
                     f.flush()
                     os.fsync(f.fileno())
             
-            logger.info(f"✅ 文件已写入: {file_path.relative_to(self.base_path)}")
+            logger.info(f"文件已写入: {file_path.relative_to(self.base_path)}")
             return str(file_path)
             
         except Exception as e:
-            logger.error(f"❌ 写入文件失败: {e}")
+            logger.error(f"写入文件失败: {e}")
             raise
     
     def read_file(
@@ -199,11 +200,11 @@ class ResearchFileSystem:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            logger.debug(f"📖 读取文件: {file_path.relative_to(self.base_path)}")
+            logger.debug(f"读取文件: {file_path.relative_to(self.base_path)}")
             return content
             
         except Exception as e:
-            logger.error(f"❌ 读取文件失败: {e}")
+            logger.error(f"读取文件失败: {e}")
             raise
     
     def list_files(
@@ -241,7 +242,7 @@ class ResearchFileSystem:
                 relative_path = file_path.relative_to(self.workspace_path)
                 files.append(str(relative_path))
         
-        logger.debug(f"📋 列出文件: {len(files)} 个文件")
+        logger.debug(f"列出文件: {len(files)} 个文件")
         return sorted(files)
     
     def delete_file(
@@ -268,7 +269,7 @@ class ResearchFileSystem:
             file_path = self.workspace_path / filename
         
         if not file_path.exists():
-            logger.warning(f"⚠️ 文件不存在: {filename}")
+            logger.warning(f"文件不存在: {filename}")
             return False
         
         try:
@@ -280,11 +281,11 @@ class ResearchFileSystem:
             if metadata_path.exists():
                 metadata_path.unlink()
             
-            logger.info(f"🗑️ 文件已删除: {file_path.relative_to(self.base_path)}")
+            logger.info(f"文件已删除: {file_path.relative_to(self.base_path)}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ 删除文件失败: {e}")
+            logger.error(f"删除文件失败: {e}")
             return False
     
     def file_exists(
@@ -354,7 +355,7 @@ class ResearchFileSystem:
                     metadata = json.load(f)
                     info['metadata'] = metadata
             except Exception as e:
-                logger.warning(f"⚠️ 读取元数据失败: {e}")
+                logger.warning(f"读取元数据失败: {e}")
         
         return info
     
@@ -419,10 +420,10 @@ class ResearchFileSystem:
                     })
                     
             except Exception as e:
-                logger.warning(f"⚠️ 搜索文件失败 {file_path}: {e}")
+                logger.warning(f"搜索文件失败 {file_path}: {e}")
                 continue
         
-        logger.debug(f"🔍 搜索完成: 找到 {len(results)} 个匹配文件")
+        logger.debug(f"搜索完成: 找到 {len(results)} 个匹配文件")
         return results
     
     def cleanup(self) -> None:
@@ -437,7 +438,7 @@ class ResearchFileSystem:
                 if file_path.is_file():
                     file_path.unlink()
         
-        logger.info(f"🧹 工作空间已清理: {self.workspace_path}")
+        logger.info(f"临时文件已清理: {self.workspace_path}")
 
 
 # ==================== LangChain 工具封装 ====================
@@ -464,7 +465,10 @@ def get_filesystem(thread_id: str) -> ResearchFileSystem:
     return _filesystem_cache[thread_id]
 
 
-@tool
+@tool(description="""写入研究文件
+    
+    将研究过程中的内容保存到文件系统。
+    适用于保存研究计划、笔记、中间结果等。""")
 def write_research_file(
     filename: str,
     content: str,
@@ -485,7 +489,7 @@ def write_research_file(
         
     Returns:
         成功消息和文件路径
-        
+
     Example:
         >>> write_research_file(
         ...     filename="research_plan.md",
@@ -503,7 +507,9 @@ def write_research_file(
         return f"保存文件失败: {str(e)}"
 
 
-@tool
+@tool(description="""读取研究文件
+    
+    从文件系统读取之前保存的文件内容。""")
 def read_research_file(
     filename: str,
     thread_id: str,
@@ -540,7 +546,9 @@ def read_research_file(
         return f"读取文件失败: {str(e)}"
 
 
-@tool
+@tool(description="""列出研究文件
+    
+    列出工作空间中的所有文件。""")
 def list_research_files(
     thread_id: str,
     subdirectory: Optional[str] = None,
@@ -575,7 +583,9 @@ def list_research_files(
         return f"列出文件失败: {str(e)}"
 
 
-@tool
+@tool(description="""搜索研究文件
+    
+    在文件内容中搜索关键词。""")
 def search_research_files(
     keyword: str,
     thread_id: str,
@@ -641,5 +651,5 @@ FILESYSTEM_TOOLS = [
 FILESYSTEM_TOOL_NAMES = [tool.name for tool in FILESYSTEM_TOOLS]
 
 
-logger.info(f"✅ 文件系统工具已加载: {', '.join(FILESYSTEM_TOOL_NAMES)}")
+logger.info(f"文件系统工具已加载: {', '.join(FILESYSTEM_TOOL_NAMES)}")
 

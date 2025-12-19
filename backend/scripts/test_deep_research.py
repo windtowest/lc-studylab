@@ -119,8 +119,8 @@ def test_basic_research():
     print_header("测试 2: 基础研究（网络搜索）")
     
     # 检查 API Key
-    if not settings.tavily_api_key:
-        print_error("未配置 TAVILY_API_KEY，跳过网络搜索测试")
+    if not settings.zhipu_api_key:
+        print_error("未配置 ZHIPU_API_KEY，跳过网络搜索测试")
         return False
     
     try:
@@ -323,9 +323,11 @@ def main():
     
     # 显示配置信息
     console.print("[bold]当前配置:[/bold]")
-    console.print(f"  OpenAI API: {'✅ 已配置' if settings.openai_api_key else '❌ 未配置'}")
-    console.print(f"  Tavily API: {'✅ 已配置' if settings.tavily_api_key else '❌ 未配置'}")
-    console.print(f"  模型: {settings.openai_model}")
+    # console.print(f"  OpenAI API: {'已配置' if settings.openai_api_key else '未配置'}")
+    # console.print(f"  Tavily API: {'已配置' if settings.tavily_api_key else '未配置'}")
+    console.print(f"  deepseek API: {'已配置' if settings.deepseek_api_key else '未配置'}")
+    console.print(f"  智谱 API: {'已配置' if settings.zhipu_api_key else '未配置'}")
+    console.print(f"  模型: {settings.deepseek_model}")
     console.print(f"  数据目录: {settings.DATA_DIR}")
     console.print()
     
@@ -336,10 +338,10 @@ def main():
     results["filesystem"] = test_filesystem()
     
     # 测试 2: 基础研究
-    if settings.tavily_api_key:
+    if settings.zhipu_api_key:
         results["basic_research"] = test_basic_research()
     else:
-        print_info("跳过基础研究测试（需要 Tavily API Key）")
+        print_info("跳过基础研究测试（需要 zhipu API Key）")
         results["basic_research"] = None
     
     # 测试 3: 完整研究
@@ -361,11 +363,11 @@ def main():
     
     for test_name, result in results.items():
         if result is True:
-            status = "✅ 通过"
+            status = "通过"
         elif result is False:
-            status = "❌ 失败"
+            status = "失败"
         else:
-            status = "⏭️  跳过"
+            status = "⏭跳过"
         
         table.add_row(test_name, status)
     
@@ -381,7 +383,7 @@ def main():
     console.print()
     
     if failed == 0:
-        print_success("所有测试通过！🎉")
+        print_success("所有测试通过！")
         return 0
     else:
         print_error(f"有 {failed} 个测试失败")

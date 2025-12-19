@@ -1,0 +1,9 @@
+{
+  "$schema": "https://langgra.ph/schema.json",
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "deep_research/langsmith_studio_graph.py:graph"
+  },
+  "env": ".env",
+  "image_distro": "wolfi"
+}

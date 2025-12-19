@@ -74,6 +74,15 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     logger.info("应用正在关闭...")
     logger.info("=" * 60)
+    
+    # 清理工作流资源（关闭数据库连接）
+    try:
+        from workflows.study_flow_graph import cleanup_study_flow
+        cleanup_study_flow()
+    except Exception as e:
+        logger.error(f"清理工作流资源时出错: {e}")
+    
+    logger.info("资源清理完成")
 
 
 # ==================== 创建 FastAPI 应用 ====================

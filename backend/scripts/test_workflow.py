@@ -314,7 +314,13 @@ def main():
         print(f"   {status}  {name}")
     
     print(f"\n总计: {passed}/{total} 测试通过")
-    
+    try:
+        from workflows.study_flow_graph import cleanup_study_flow
+        cleanup_study_flow()
+    except Exception as e:
+        logger.error(f"清理工作流资源时出错: {e}")
+
+    logger.info("资源清理完成")
     if passed == total:
         print("\n🎉 所有测试通过！")
         return 0
@@ -325,4 +331,5 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
 

@@ -16,6 +16,8 @@ sentence-transformers==5.1.2
 # LangGraph - 用于构建复杂工作流
 langgraph==1.0.2
 langgraph-checkpoint-sqlite==3.0.0  # SQLite 检查点支持
+langgraph-checkpoint-postgres==2.0.11  # PostgreSQL 检查点支持
+psycopg[binary]==3.3.2  # PostgreSQL 驱动
 
 # LangChain 集成包
 langchain-tavily==0.2.13  # Tavily 搜索工具（V1.0.0 推荐）

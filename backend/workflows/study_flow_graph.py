@@ -15,6 +15,7 @@ import sqlite3
 from datetime import datetime
 from typing import Literal
 
+from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -164,26 +165,49 @@ def create_study_flow_graph(checkpointer_path: str = None) -> StateGraph:
     # 创建内存检查点保存器
     # 注意：LangGraph 1.0.2 使用 MemorySaver，不支持持久化到文件
     # 如需持久化，请升级到支持 SqliteSaver 的更高版本
-    checkpointer = MemorySaver()
+    # checkpointer = MemorySaver()
     
     # ==================== 编译工作流 ====================
     logger.info("[Study Flow Graph] 编译工作流图...")
+    
+    # 创建 PostgreSQL checkpointer
+    global _checkpointer_cm  # 需要保存上下文管理器引用
+    
+    try:
+        logger.info(f"[Study Flow Graph] 连接 PostgreSQL: {settings.db_uri.split('@')[-1]}")  # 只显示主机部分
+        
+        # from_conn_string 返回上下文管理器，需要先进入上下文
+        _checkpointer_cm = PostgresSaver.from_conn_string(settings.db_uri)
+        checkpointer = _checkpointer_cm.__enter__()  # 手动进入上下文
+        
+        # 初始化数据库表结构（首次使用时会创建表，已存在则跳过）
+        logger.info("[Study Flow Graph] 初始化 checkpointer 表结构...")
+        checkpointer.setup()
+        logger.info("[Study Flow Graph] Checkpointer 初始化完成")
+        
+    except Exception as e:
+        logger.error(f"[Study Flow Graph] 初始化 PostgreSQL checkpointer 失败: {e}")
+        logger.warning("[Study Flow Graph] 降级使用内存存储（重启后数据会丢失）")
+        checkpointer = MemorySaver()
+        _checkpointer_cm = None
     
     # 编译工作流，配置检查点和中断点
     app = workflow.compile(
         checkpointer=checkpointer,
         interrupt_before=["human_review"]  # 在 human_review 节点之前暂停
     )
-    
+
     logger.info("[Study Flow Graph] 学习工作流图创建完成")
     logger.info("[Study Flow Graph] 中断点设置在: human_review (等待用户答题)")
-    
+
     return app
 
 
 # ==================== 全局工作流实例 ====================
 # 创建一个全局的工作流实例，供 API 使用
 study_flow_app = None
+_checkpointer = None  # 保存 checkpointer 引用，用于清理
+_checkpointer_cm = None  # 保存上下文管理器，防止被垃圾回收
 
 
 def get_study_flow_app():
@@ -193,13 +217,42 @@ def get_study_flow_app():
     Returns:
         编译后的工作流应用
     """
-    global study_flow_app
+    global study_flow_app, _checkpointer
     
     if study_flow_app is None:
         logger.info("[Study Flow Graph] 初始化全局工作流实例")
         study_flow_app = create_study_flow_graph()
+        
+        # 保存 checkpointer 引用（从 app 中获取）
+        if hasattr(study_flow_app, 'checkpointer'):
+            logger.info("[Study Flow Graph] 获取检查点保存器实例")
+            _checkpointer = study_flow_app.checkpointer
     
     return study_flow_app
+
+
+def cleanup_study_flow():
+    """
+    清理工作流资源（关闭数据库连接）
+    
+    应该在应用关闭时调用
+    """
+    global study_flow_app, _checkpointer, _checkpointer_cm
+    
+    logger.info("[Study Flow Graph] 清理工作流资源...")
+    
+    # 如果使用了上下文管理器，调用 __exit__ 清理
+    if _checkpointer_cm is not None:
+        try:
+            _checkpointer_cm.__exit__(None, None, None)
+            logger.info("[Study Flow Graph] PostgreSQL 连接已关闭")
+        except Exception as e:
+            logger.error(f"[Study Flow Graph] 关闭连接时出错: {e}")
+    
+    study_flow_app = None
+    _checkpointer = None
+    _checkpointer_cm = None
+    logger.info("[Study Flow Graph] 工作流资源清理完成")
 
 
 # ==================== 工作流执行辅助函数 ====================

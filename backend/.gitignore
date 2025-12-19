@@ -46,7 +46,6 @@ logs/
 .DS_Store
 
 # 文档
-../MIGRATION.md
 
 # 测试
 .pytest_cache/

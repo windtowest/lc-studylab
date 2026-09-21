@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/rlhf_integration/preference_generator.py
+# hypothesis_version: 6.131.25
+
+[0.0, 1.0, 6.0, 7.0, 1000, 'chosen', 'chosen_score', 'chosen_threshold', 'generated_pairs', 'high_score_records', 'low_score_records', 'max_score', 'metadata', 'min_score', 'prompt', 'records_with_patch', 'rejected', 'rejected_score', 'rejected_threshold', 'self_reward_agent', 'source', 'source_records', 'timestamp', 'total_records', 'utf-8', 'w', '没有可导出的偏好数据']

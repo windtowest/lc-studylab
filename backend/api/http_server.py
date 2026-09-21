@@ -121,7 +121,7 @@ async def log_requests(request: Request, call_next):
     start_time = time.time()
     
     # 记录请求
-    logger.info(f"{request.method} {request.url.path}")
+    logger.info(f"请求 -{request.method} {request.url.path}")
     
     # 处理请求
     try:
@@ -132,7 +132,7 @@ async def log_requests(request: Request, call_next):
         
         # 记录响应
         logger.info(
-            f"{request.method} {request.url.path} "
+            f"响应 -{request.method} {request.url.path} "
             f"- {response.status_code} - {process_time:.3f}s"
         )
         
@@ -173,17 +173,20 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ==================== 路由注册 ====================
 
+# 统一 API 前缀
+API_PREFIX = "/smartfarm-ai"
+
 # 注册聊天路由
-app.include_router(chat.router)
+app.include_router(chat.router, prefix=API_PREFIX)
 
 # 注册 RAG 路由
-app.include_router(rag.router)
+app.include_router(rag.router, prefix=API_PREFIX)
 
 # 注册工作流路由（第 3 阶段）
-app.include_router(workflow.router)
+app.include_router(workflow.router, prefix=API_PREFIX)
 
 # 注册深度研究路由（第 4 阶段）
-app.include_router(deep_research.router)
+app.include_router(deep_research.router, prefix=API_PREFIX)
 
 
 # ==================== 根路径和健康检查 ====================

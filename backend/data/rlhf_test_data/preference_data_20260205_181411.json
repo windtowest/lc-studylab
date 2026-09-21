@@ -1,0 +1,142 @@
+[
+  {
+    "prompt": "帮我翻译这句话：Hello World",
+    "chosen": "关于'帮我翻译这句话：Hello World'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 9.02794010660838,
+      "rejected_score": 4.5725177971623605,
+      "source": "self_reward_agent",
+      "source_records": [
+        "a7925822-83e3-496a-a344-9f0811e11f2c",
+        "6f97a61a-6459-4f59-baf0-5913e535f585"
+      ]
+    }
+  },
+  {
+    "prompt": "请帮我计算123*456",
+    "chosen": "关于'请帮我计算123*456'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 8.946565710814514,
+      "rejected_score": 5.512980090555189,
+      "source": "self_reward_agent",
+      "source_records": [
+        "b6b660d2-5b72-48b2-8ee0-12e6248cd844",
+        "51692862-2061-4771-904c-31c16ffb86ce"
+      ]
+    }
+  },
+  {
+    "prompt": "请推荐几本编程入门书籍",
+    "chosen": "关于'请推荐几本编程入门书籍'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 8.289586519181986,
+      "rejected_score": 2.801928667184649,
+      "source": "self_reward_agent",
+      "source_records": [
+        "5288a4aa-6f3d-467d-b271-07720901796b",
+        "3e651703-d45b-424e-b7d7-d0ce9cb0364f"
+      ]
+    }
+  },
+  {
+    "prompt": "请解释量子计算的基本原理",
+    "chosen": "关于'请解释量子计算的基本原理'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 8.176138684948548,
+      "rejected_score": 2.692729940980592,
+      "source": "self_reward_agent",
+      "source_records": [
+        "19eb9ecd-ad62-4e23-86d3-71e5c4256dc5",
+        "1391b17c-d13e-40ec-b844-969fcfbdae79"
+      ]
+    }
+  },
+  {
+    "prompt": "请解释什么是自然语言处理？",
+    "chosen": "关于'请解释什么是自然语言处理？'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 9.411379589298361,
+      "rejected_score": 3.0932174301150903,
+      "source": "self_reward_agent",
+      "source_records": [
+        "eb86899e-8929-4a4b-9c24-1f6dd71c32d1",
+        "f3444ddc-d00c-408a-b64d-954bc6b3c751"
+      ]
+    }
+  },
+  {
+    "prompt": "请解释什么是区块链？",
+    "chosen": "关于'请解释什么是区块链？'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 7.893455814098514,
+      "rejected_score": 2.124662659541158,
+      "source": "self_reward_agent",
+      "source_records": [
+        "012351c7-8d55-4173-954c-f7ba7ad38603",
+        "37a5108f-2b2c-4450-bb9b-d9a892b030d8"
+      ]
+    }
+  },
+  {
+    "prompt": "Python和Java哪个更好？",
+    "chosen": "Python和Java各有优势：Python语法简洁，适合数据科学和快速开发；Java性能稳定，适合大型企业应用。选择取决于具体需求和场景。",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 7.778691321582844,
+      "rejected_score": 3.394255506248923,
+      "source": "self_reward_agent",
+      "source_records": [
+        "8dadbd19-456f-421c-bbd6-63d4f07df53f",
+        "8bb99bbf-5e6e-4ddd-a640-245b39932eb8"
+      ]
+    }
+  },
+  {
+    "prompt": "什么是神经网络？",
+    "chosen": "关于'什么是神经网络？'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 8.333503785774742,
+      "rejected_score": 5.455261497218507,
+      "source": "self_reward_agent",
+      "source_records": [
+        "7fb63455-84da-43b6-87a1-48b67d345d47",
+        "6887078f-d3e5-428a-be7b-9d8eb04b00f8"
+      ]
+    }
+  },
+  {
+    "prompt": "什么是深度学习？",
+    "chosen": "关于'什么是深度学习？'的详细解答：这是一个很好的问题，让我为您详细解释...",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 8.799341632613967,
+      "rejected_score": 4.583223271986535,
+      "source": "self_reward_agent",
+      "source_records": [
+        "542a0b32-b2c0-43aa-9f15-b49847096c52",
+        "b97c8973-f91a-43dc-9653-19f0b6346fa5"
+      ]
+    }
+  },
+  {
+    "prompt": "请解释什么是机器学习？",
+    "chosen": "机器学习是人工智能的一个分支，它使计算机能够从数据中学习，而无需明确编程。主要类型包括：监督学习、无监督学习和强化学习。机器学习广泛应用于图像识别、自然语言处理、推荐系统等领域。",
+    "rejected": "不太清楚，可能是这样吧。",
+    "metadata": {
+      "chosen_score": 9.127089670385804,
+      "rejected_score": 2.606079856703135,
+      "source": "self_reward_agent",
+      "source_records": [
+        "ebacbdad-8d49-4ab2-bb3e-bf4d949ec323",
+        "99847830-0a7f-4ee1-91a6-409a6163d7a5"
+      ]
+    }
+  }
+]

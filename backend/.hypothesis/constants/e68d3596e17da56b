@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/critic/prompts.py
+# hypothesis_version: 6.131.25
+
+['step', 'tool', 'value', '失败', '工具', '工具调用:', '成功', '推理步骤:', '无中间结果记录', '无工具调用记录', '无推理步骤记录', '无相关步骤信息', '无系统提示', '步骤']

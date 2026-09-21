@@ -1,0 +1,37 @@
+{
+  "report_id": "report_20260205_191753_14648ea2",
+  "training_status": "completed",
+  "trigger_result": {
+    "triggered": true,
+    "status": "completed",
+    "data_count": 10,
+    "min_required": 10,
+    "export_path": "data/rlhf_test_data/preference_data_20260205_191753.json",
+    "message": "训练已触发，数据导出到: data/rlhf_test_data/preference_data_20260205_191753.json",
+    "timestamp": "2026-02-05T19:17:53.261902"
+  },
+  "metrics": {
+    "total_pairs": 10,
+    "high_score_records": 13,
+    "low_score_records": 11,
+    "records_with_patch": 11,
+    "average_score_difference": 4.76,
+    "chosen_threshold": 7.0,
+    "rejected_threshold": 6.0
+  },
+  "data_export_path": "data/rlhf_test_data/preference_data_20260205_191753.json",
+  "training_start_time": "2026-02-05T19:17:53.259112",
+  "training_end_time": "2026-02-05T19:18:01.832508",
+  "training_duration_seconds": 8.573396,
+  "improvement_indicators": {
+    "data_count": 10,
+    "rm_training_executed": true,
+    "rm_training_success": true
+  },
+  "notes": [
+    "自动触发的RM训练",
+    "RM训练已执行",
+    "RM训练完成，模型保存到: /home/tianzuolin/learn/agent/lc-studylab/backend/data/rm_model_output"
+  ],
+  "generated_at": "2026-02-05T19:18:01.832548"
+}

@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/critic/models.py
+# hypothesis_version: 6.131.25
+
+['format_error', 'info_missing', 'logic_error', 'reasoning_break', 'tool_error']

@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/agents/self_reward_agent.py
+# hypothesis_version: 6.131.25
+
+[0.5, 6.0, 7.0, 100, 'RLHF训练触发器未启用', 'chosen', 'chosen_score', 'data_count', 'default', 'enabled', 'error', 'export_path', 'generated_pairs', 'high_score_records', 'low_score_records', 'max_score', 'message', 'min_score', 'preference_pairs', 'prompt', 'rejected', 'rejected_score', 'rlhf', 'score_threshold', 'status', 'success', 'total_records', 'training_status', 'trigger_threshold', 'unknown', '使用patch作为完整替换', '候选列表为空', '偏好数据生成器未启用', '将patch作为补充附加', '应用patch修正响应', '抱歉，处理您的请求时出现错误。', '未能生成任何候选响应', '未进行Critic分析', '经验存储初始化成功', '经验存储未启用', '评分低于阈值但无可用patch']

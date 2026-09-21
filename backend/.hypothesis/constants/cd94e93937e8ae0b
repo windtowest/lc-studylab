@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/self_reward/prompts.py
+# hypothesis_version: 6.131.25
+
+['## 参考上下文\n{context}', 'value']

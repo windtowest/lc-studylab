@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-02-05T19:54:29.849569",
+  "stages": {
+    "status": {
+      "experience_records": {
+        "total": 26,
+        "high_score": 13,
+        "low_score": 11
+      },
+      "preference_pairs": {
+        "count": 10,
+        "threshold": 10,
+        "ready_for_training": true
+      },
+      "rm_model": {
+        "exists": false,
+        "latest_path": null,
+        "versions": [],
+        "base_dir": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/rm_model"
+      },
+      "ppo_model": {
+        "exists": false,
+        "latest_path": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/ppo_model/best_model",
+        "versions": [
+          "best_model"
+        ],
+        "base_dir": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/ppo_model"
+      },
+      "next_training_dir": {
+        "rm": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/rm_model/20260205_195428",
+        "ppo": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/ppo_model/20260205_195428",
+        "timestamp": "20260205_195428"
+      }
+    },
+    "export": {
+      "success": true,
+      "path": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/rlhf_preference_data/preference_data_20260205_195429_rm_format.json"
+    },
+    "rm_training": {
+      "success": true,
+      "output_dir": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/rm_model/20260205_195428"
+    },
+    "ppo_training": {
+      "success": true,
+      "output_dir": "/home/tianzuolin/learn/agent/lc-studylab/backend/data/ppo_model/20260205_195428"
+    }
+  },
+  "success": true
+}

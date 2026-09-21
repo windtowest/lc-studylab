@@ -64,6 +64,7 @@ class SubmitAnswersResponse(BaseModel):
     score_details: Optional[Dict[str, Any]] = Field(None, description="详细评分")
     feedback: Optional[str] = Field(None, description="反馈信息")
     should_retry: bool = Field(False, description="是否需要重新出题")
+    quiz: Optional[Dict[str, Any]] = Field(None, description="新的练习题（仅在 should_retry=True 时返回）")
     message: str
 
 
@@ -182,6 +183,7 @@ async def submit_user_answers(request: SubmitAnswersRequest):
             score_details=result.get("score_details"),
             feedback=result.get("feedback"),
             should_retry=should_retry,
+            quiz=result.get("quiz") if should_retry else None,
             message=message
         )
         

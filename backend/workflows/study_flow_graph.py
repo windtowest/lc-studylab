@@ -160,7 +160,7 @@ def create_study_flow_graph(checkpointer_path: str = None) -> StateGraph:
     # # 确保目录存在
     # os.makedirs(os.path.dirname(checkpointer_path), exist_ok=True)
     
-    logger.info(f"[Study Flow Graph] 配置检查点存储: {checkpointer_path}")
+    # logger.info(f"[Study Flow Graph] 配置检查点存储: {checkpointer_path}")
     
     # 创建内存检查点保存器
     # 注意：LangGraph 1.0.2 使用 MemorySaver，不支持持久化到文件

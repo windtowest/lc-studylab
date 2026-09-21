@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/tools/weather.py
+# hypothesis_version: 6.131.25
+
+[10.0, '1', 'JSON', 'all', 'amap_key', 'base', 'casts', 'city', 'date', 'day_after_tomorrow', 'daypower', 'daytemp', 'dayweather', 'daywind', 'extensions', 'forecasts', 'get_daily_weather', 'get_weather', 'get_weather_forecast', 'humidity', 'key', 'lives', 'nightpower', 'nighttemp', 'nightweather', 'nightwind', 'output', 'province', 'reporttime', 'status', 'temperature', 'today', 'tomorrow', 'weather', 'week', 'winddirection', 'windpower', '今天', '后天', '天气查询超时，请稍后重试', '明天', '未查询到具体预报数据', '未查询到天气数据', '未查询到天气预报数据']

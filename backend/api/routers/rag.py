@@ -358,36 +358,126 @@ async def query_stream(request: QueryRequest):
         
         # 流式生成器
         async def event_generator():
+            from langchain_core.messages import AIMessage, ToolMessage
+            
             try:
-                # 流式执行 - 使用字典输入
-                async for chunk in agent.astream({"messages": [{"role": "user", "content": request.query}]}):
-                    # 提取内容
-                    if isinstance(chunk, dict) and "messages" in chunk:
-                        messages = chunk["messages"]
-                        if messages:
-                            content = messages[-1].content if hasattr(messages[-1], 'content') else str(messages[-1])
-                        else:
-                            content = str(chunk)
-                    else:
-                        content = str(chunk)
-                    
-                    # 输出内容
-                    data = {
-                        "type": "content",
-                        "content": content,
-                    }
-                    yield f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+                # 发送开始事件
+                yield f"data: {json.dumps({'type': 'start', 'message': '开始查询...'}, ensure_ascii=False)}\n\n"
                 
-                # 发送完成信号
-                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                # 准备输入
+                from langchain_core.messages import HumanMessage
+                messages = [HumanMessage(content=request.query)]
+                graph_input = {"messages": messages}
+                
+                # 追踪状态
+                current_content = ""
+                tool_calls_map = {}
+                all_messages = []
+                
+                # 使用 astream 获取详细输出
+                async for chunk in agent.astream(graph_input, stream_mode="messages"):
+                    if isinstance(chunk, tuple) and len(chunk) == 2:
+                        message, metadata = chunk
+                    else:
+                        message = chunk
+                        metadata = {}
+                    
+                    # 保存所有消息
+                    all_messages.append(message)
+                    
+                    # 处理 AI 消息
+                    if isinstance(message, AIMessage):
+                        # 提取并发送工具调用
+                        tool_calls = getattr(message, "tool_calls", [])
+                        if tool_calls:
+                            for tool_call in tool_calls:
+                                tool_id = tool_call.get("id", "")
+                                tool_name = tool_call.get("name", "")
+                                
+                                tool_info = {
+                                    "id": tool_id,
+                                    "name": tool_name,
+                                    "type": f"tool-call-{tool_name}",
+                                    "state": "input-available",
+                                    "parameters": tool_call.get("args", {}),
+                                }
+                                tool_calls_map[tool_id] = tool_info
+                                
+                                # 发送工具调用事件
+                                yield f"data: {json.dumps({'type': 'tool', 'data': tool_info}, ensure_ascii=False)}\n\n"
+                        
+                        # 发送内容增量
+                        if message.content and not tool_calls:
+                            # 计算新增内容
+                            def _lcp_len(a: str, b: str) -> int:
+                                i = 0
+                                for ca, cb in zip(a, b):
+                                    if ca != cb:
+                                        break
+                                    i += 1
+                                return i
+                            
+                            lcp = _lcp_len(current_content, message.content)
+                            if lcp < len(message.content):
+                                new_content = message.content[lcp:]
+                                current_content = message.content
+                                
+                                chunk_data = {
+                                    "type": "chunk",
+                                    "content": new_content,
+                                }
+                                yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
+                    
+                    # 处理工具结果
+                    elif isinstance(message, ToolMessage):
+                        tool_call_id = getattr(message, "tool_call_id", "")
+                        is_error = getattr(message, "status", None) == "error"
+                        
+                        if tool_call_id in tool_calls_map:
+                            tool_info = tool_calls_map[tool_call_id]
+                            tool_info["state"] = "output-error" if is_error else "output-available"
+                            tool_info["result"] = None if is_error else message.content
+                            tool_info["error"] = message.content if is_error else None
+                            
+                            # 发送工具结果更新
+                            yield f"data: {json.dumps({'type': 'tool_result', 'data': tool_info}, ensure_ascii=False)}\n\n"
+                    
+                    # 小延迟
+                    await asyncio.sleep(0.01)
+                
+                # 查找最终 AI 消息
+                final_ai_message = None
+                for msg in reversed(all_messages):
+                    if isinstance(msg, AIMessage) and msg.content and msg.content.strip():
+                        final_ai_message = msg
+                        break
+                
+                # 发送剩余内容
+                if final_ai_message and final_ai_message.content:
+                    final_content = final_ai_message.content
+                    if len(final_content) > len(current_content):
+                        remaining_content = final_content[len(current_content):]
+                        if remaining_content:
+                            chunk_data = {
+                                "type": "chunk",
+                                "content": remaining_content,
+                            }
+                            yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
+                
+                # 发送结束事件
+                yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
+                
+                logger.info("流式查询完成")
                 
             except Exception as e:
                 logger.error(f"流式查询错误: {e}")
+                logger.exception(e)
                 error_data = {
                     "type": "error",
+                    "message": "查询过程中出现错误",
                     "error": str(e),
                 }
-                yield f"data: {json.dumps(error_data)}\n\n"
+                yield f"data: {json.dumps(error_data, ensure_ascii=False)}\n\n"
         
         return StreamingResponse(
             event_generator(),
@@ -395,6 +485,7 @@ async def query_stream(request: QueryRequest):
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",  # 禁用 Nginx 缓冲
             },
         )
         

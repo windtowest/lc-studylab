@@ -1,0 +1,37 @@
+{
+  "report_id": "report_20260205_191442_1e8d5ba5",
+  "training_status": "completed",
+  "trigger_result": {
+    "triggered": true,
+    "status": "completed",
+    "data_count": 10,
+    "min_required": 10,
+    "export_path": "data/rlhf_test_data/preference_data_20260205_191442.json",
+    "message": "训练已触发，数据导出到: data/rlhf_test_data/preference_data_20260205_191442.json",
+    "timestamp": "2026-02-05T19:14:42.235567"
+  },
+  "metrics": {
+    "total_pairs": 10,
+    "high_score_records": 11,
+    "low_score_records": 11,
+    "records_with_patch": 11,
+    "average_score_difference": 4.79,
+    "chosen_threshold": 7.0,
+    "rejected_threshold": 6.0
+  },
+  "data_export_path": "data/rlhf_test_data/preference_data_20260205_191442.json",
+  "training_start_time": "2026-02-05T19:14:42.233306",
+  "training_end_time": "2026-02-05T19:14:51.851812",
+  "training_duration_seconds": 9.618506,
+  "improvement_indicators": {
+    "data_count": 10,
+    "rm_training_executed": true,
+    "rm_training_success": false
+  },
+  "notes": [
+    "自动触发的RM训练",
+    "RM训练已执行",
+    "RM训练失败: ages/torch/nn/modules/module.py\", line 1736, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/tianzuolin/anaconda3/en"
+  ],
+  "generated_at": "2026-02-05T19:14:51.851850"
+}

@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/my_llm.py
+# hypothesis_version: 6.131.25
+
+[1.5, 512, 'DEEPSEEK_API_KEY', 'DEEPSEEK_BASE_URL', 'LOCAL_BASE_URL', 'chat_template_kwargs', 'deepseek-chat', 'enable_thing', 'qwen3-8b', 'xx']

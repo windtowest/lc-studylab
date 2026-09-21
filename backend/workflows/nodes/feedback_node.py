@@ -80,8 +80,8 @@ def feedback_node(state: StudyFlowState) -> Dict[str, Any]:
         logger.info(f"[Feedback Node] 反馈生成完成")
         
         # 决定是否需要重新出题
-        # 规则：得分低于60分且重试次数小于3次
-        should_retry = score < 60 and retry_count < 3
+        # 规则：得分低于60分且重试次数小于2次
+        should_retry = score < 60 and retry_count < 2
         
         # 构建反馈消息
         feedback_message = f"\n\n💬 **学习反馈**\n\n{feedback}\n\n"
@@ -89,7 +89,7 @@ def feedback_node(state: StudyFlowState) -> Dict[str, Any]:
         if should_retry:
             feedback_message += f"由于得分未达到60分，系统将为您重新生成练习题。（第 {retry_count + 1} 次重试）\n"
             feedback_message += "请继续努力，相信您一定能掌握这些知识点！"
-        elif retry_count >= 3:
+        elif retry_count >= 2:
             feedback_message += "您已经尝试了3次，建议先回顾学习资料，巩固基础知识后再来挑战。"
         else:
             feedback_message += "恭喜您通过测验！继续保持这样的学习状态！"

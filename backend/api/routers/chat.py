@@ -537,110 +537,42 @@ async def chat_stream(request: ChatRequest):
                         }
                         yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
                         current_message_content = final_content
-            
-            # 如果最终消息为空或内容很少，但有工具调用结果，使用工具结果作为回复
-            if (not final_ai_message or not final_ai_message.content or len(final_ai_message.content.strip()) < 10) and tool_calls_map:
-                # 查找天气工具的结果（优先）
-                weather_tools = ["get_daily_weather", "get_weather_forecast", "get_weather"]
-                for tool_name in weather_tools:
-                    for tool_info in tool_calls_map.values():
-                        if (tool_info.get("name") == tool_name and 
-                            tool_info.get("state") == "output-available" and 
-                            tool_info.get("result")):
-                            result_content = tool_info.get("result", "")
-                            if result_content and result_content not in current_message_content:
-                                # 发送工具结果作为最终回复
-                                chunk_data = {
-                                    "type": "chunk",
-                                    "content": result_content,
-                                }
-                                yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
-                                logger.info(f"使用工具 {tool_name} 的结果作为最终回复")
-                                break
-                    else:
-                        continue
-                    break
-                else:
-                    # 如果没有天气工具结果，使用第一个成功的工具结果
-                    for tool_info in tool_calls_map.values():
-                        if (tool_info.get("state") == "output-available" and 
-                            tool_info.get("result") and
-                            tool_info.get("result") not in current_message_content):
-                            result_content = tool_info.get("result", "")
-                            if result_content:
-                                chunk_data = {
-                                    "type": "chunk",
-                                    "content": result_content,
-                                }
-                                yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
-                        logger.info(f"✅ 使用工具 {tool_info.get('name')} 的结果作为最终回复")
-                        break
 
-            def _needs_completion(text: str) -> bool:
-                if not text:
-                    return True
-                t = text.strip()
-                if len(t) < 30:
-                    return True
-                if not any(t.endswith(p) for p in ["。", "！", "？", ".", "!", "?"]):
-                    return True
-                return False
 
-            if not prefer_tool_result and _needs_completion(current_message_content):
-                from core.models import get_chat_model
-                model = get_chat_model()
-                prompt = (
-                    f"用户问题：{request.message}\n\n"
-                    f"当前回复（不完整）：{current_message_content}\n\n"
-                    "请继续并完整回答上述问题，补充必要的解释或例子，最后给出一句简明结论。"
-                )
-                try:
-                    completion = await model.ainvoke([{ "role": "user", "content": prompt }])
-                    extra = getattr(completion, "content", "")
-                    if extra:
-                        chunk_data = {
-                            "type": "chunk",
-                            "content": extra,
-                        }
-                        yield f"data: {json.dumps(chunk_data, ensure_ascii=False)}\n\n"
-                        current_message_content += extra
-                except Exception:
-                    pass
-            
             # 生成动态建议（基于用户问题与最终助手回复）
-            try:
-                from core.models import get_chat_model
-                model = get_chat_model()
-                suggestions_prompt = (
-                    "你是一个辅助对话的助手。请根据以下用户问题和最终回复，生成4条简洁、相关、可点击的后续问题建议。\n"
-                    "用JSON数组返回，每个元素是不超过30字的中文字符串，不要包含编号或多余文本。\n\n"
-                    f"用户问题：{request.message}\n\n"
-                    f"最终回复：{current_message_content}"
-                )
-                completion = await model.ainvoke([{ "role": "user", "content": suggestions_prompt }])
-                raw = getattr(completion, "content", "")
-                suggestions: list[str] = []
-                try:
-                    parsed = json.loads(raw)
-                    if isinstance(parsed, list):
-                        suggestions = [str(x) for x in parsed if isinstance(x, (str, int, float))]
-                        suggestions = [s for s in suggestions if s.strip()][:4]
-                except Exception:
-                    # 尝试提取JSON片段
-                    import re
-                    m = re.search(r"\[.*\]", raw, re.DOTALL)
-                    if m:
-                        try:
-                            parsed2 = json.loads(m.group(0))
-                            if isinstance(parsed2, list):
-                                suggestions = [str(x) for x in parsed2 if isinstance(x, (str, int, float))]
-                                suggestions = [s for s in suggestions if s.strip()][:4]
-                        except Exception:
-                            suggestions = []
-                if suggestions:
-                    yield f"data: {json.dumps({'type': 'suggestions', 'data': suggestions}, ensure_ascii=False)}\n\n"
-            except Exception:
-                pass
+            # try:
+            #     from core.models import get_chat_model
+            #     model = get_chat_model()
+            #     suggestions_prompt = (
+            #         "你是一个辅助对话的助手。请根据以下用户问题和最终回复，生成4条简洁、相关、可点击的后续问题建议。\n"
+            #         "用JSON数组返回，每个元素是不超过30字的中文字符串，不要包含编号或多余文本。\n\n"
+            #         f"用户问题：{request.message}\n\n"
+            #         f"最终回复：{current_message_content}"
+            #     )
+            #     completion = await model.ainvoke([{ "role": "user", "content": suggestions_prompt }])
+            #     raw = getattr(completion, "content", "")
+            #     suggestions: list[str] = []
+            #     try:
+            #         parsed = json.loads(raw)
+            #         if isinstance(parsed, list):
+            #             suggestions = [str(x) for x in parsed if isinstance(x, (str, int, float))]
+            #             suggestions = [s for s in suggestions if s.strip()][:4]
+            #     except Exception:
+            #         # 尝试提取JSON片段
+            #         import re
+            #         m = re.search(r"\[.*\]", raw, re.DOTALL)
+            #         if m:
+            #             try:
+            #                 parsed2 = json.loads(m.group(0))
+            #                 if isinstance(parsed2, list):
+            #                     suggestions = [str(x) for x in parsed2 if isinstance(x, (str, int, float))]
+            #                     suggestions = [s for s in suggestions if s.strip()][:4]
+            #             except Exception:
+            #                 suggestions = []
+            #     if suggestions:
+            #         yield f"data: {json.dumps({'type': 'suggestions', 'data': suggestions}, ensure_ascii=False)}\n\n"
+            # except Exception:
+            #     pass
 
             # 发送最终的 context 信息
             context_info = usage_tracker.get_usage_info()
@@ -650,7 +582,7 @@ async def chat_stream(request: ChatRequest):
             yield f"data: {json.dumps({'type': 'end', 'message': '生成完成'}, ensure_ascii=False)}\n\n"
             
             # 打印统计
-            usage_tracker.log_summary()
+            # usage_tracker.log_summary()
             logger.info("流式聊天请求处理完成")
             
         except Exception as e:

@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/tools/web_search.py
+# hypothesis_version: 6.131.25
+
+[200, '...', 'advanced', 'api_key', 'basic', 'content', 'exclude_domains', 'include_domains', 'max_results', 'query', 'search_depth', 'search_pro', 'title', 'url', '无标题', '未找到搜索结果', '没有搜索到任何结果']

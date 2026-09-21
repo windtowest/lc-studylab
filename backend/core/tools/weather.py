@@ -346,7 +346,7 @@ def get_daily_weather(
         "output": "JSON"
     }
     
-    logger.info(f"🌤️ 查询天气: city={city}, day={day} (offset={day_offset})")
+    logger.info(f"查询天气: city={city}, day={day} (offset={day_offset})")
     
     try:
         # 发送 HTTP 请求

@@ -1,0 +1,37 @@
+{
+  "report_id": "report_20260205_191646_c2fdf3f4",
+  "training_status": "completed",
+  "trigger_result": {
+    "triggered": true,
+    "status": "completed",
+    "data_count": 10,
+    "min_required": 10,
+    "export_path": "data/rlhf_test_data/preference_data_20260205_191646.json",
+    "message": "训练已触发，数据导出到: data/rlhf_test_data/preference_data_20260205_191646.json",
+    "timestamp": "2026-02-05T19:16:46.897994"
+  },
+  "metrics": {
+    "total_pairs": 10,
+    "high_score_records": 11,
+    "low_score_records": 11,
+    "records_with_patch": 11,
+    "average_score_difference": 4.79,
+    "chosen_threshold": 7.0,
+    "rejected_threshold": 6.0
+  },
+  "data_export_path": "data/rlhf_test_data/preference_data_20260205_191646.json",
+  "training_start_time": "2026-02-05T19:16:46.895629",
+  "training_end_time": "2026-02-05T19:16:54.843803",
+  "training_duration_seconds": 7.948174,
+  "improvement_indicators": {
+    "data_count": 10,
+    "rm_training_executed": true,
+    "rm_training_success": false
+  },
+  "notes": [
+    "自动触发的RM训练",
+    "RM训练已执行",
+    "RM训练失败:  raise RuntimeError(\nRuntimeError: \n            Some tensors share memory, this will lead to duplicate memory on disk and potential differences when loading them again: [{'model.base_model.mod"
+  ],
+  "generated_at": "2026-02-05T19:16:54.843843"
+}

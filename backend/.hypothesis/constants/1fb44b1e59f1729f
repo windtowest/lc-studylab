@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/self_reward/scorer.py
+# hypothesis_version: 6.131.25
+
+[0.0, 0.2, 0.25, 0.3, 5.0, 6.0, 10.0, 'context', 'dimension', 'dimension_scores', 'overall_reason', 'overall_score', 'query', 'reason', 'response', 'score', '评分失败，使用默认中等评分', '评分解析不完整', '评分解析失败，使用提取的分数', '默认评分']

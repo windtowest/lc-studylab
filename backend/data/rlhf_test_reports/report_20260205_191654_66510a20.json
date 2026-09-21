@@ -1,0 +1,37 @@
+{
+  "report_id": "report_20260205_191654_66510a20",
+  "training_status": "completed",
+  "trigger_result": {
+    "triggered": true,
+    "status": "completed",
+    "data_count": 10,
+    "min_required": 10,
+    "export_path": "data/rlhf_test_data/preference_data_20260205_191654.json",
+    "message": "训练已触发，数据导出到: data/rlhf_test_data/preference_data_20260205_191654.json",
+    "timestamp": "2026-02-05T19:16:54.856691"
+  },
+  "metrics": {
+    "total_pairs": 10,
+    "high_score_records": 11,
+    "low_score_records": 11,
+    "records_with_patch": 11,
+    "average_score_difference": 4.79,
+    "chosen_threshold": 7.0,
+    "rejected_threshold": 6.0
+  },
+  "data_export_path": "data/rlhf_test_data/preference_data_20260205_191654.json",
+  "training_start_time": "2026-02-05T19:16:54.854075",
+  "training_end_time": "2026-02-05T19:16:54.860652",
+  "training_duration_seconds": 0.006577,
+  "improvement_indicators": {
+    "data_count": 10,
+    "rm_training_executed": false,
+    "rm_training_success": false
+  },
+  "notes": [
+    "自动触发的RM训练",
+    "RM训练未执行（仅导出数据）",
+    ""
+  ],
+  "generated_at": "2026-02-05T19:16:54.860659"
+}

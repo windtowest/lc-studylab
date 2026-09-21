@@ -30,6 +30,19 @@ logger = get_logger(__name__)
 # 检索类型
 SearchType = Literal["similarity", "mmr", "similarity_score_threshold"]
 
+# 延迟导入策略选择器（避免循环导入）
+_strategy_selector = None
+
+
+def get_strategy_selector():
+    """获取全局策略选择器实例（单例模式）"""
+    global _strategy_selector
+    if _strategy_selector is None:
+        from rag.strategy_selector import create_strategy_selector
+        # 使用混合模式：规则优先，LLM 兜底
+        _strategy_selector = create_strategy_selector(mode="hybrid")
+    return _strategy_selector
+
 
 def create_retriever(
     vector_store: VectorStore,
@@ -37,6 +50,8 @@ def create_retriever(
     k: Optional[int] = None,
     score_threshold: Optional[float] = None,
     fetch_k: Optional[int] = None,
+    auto_select: bool = False,
+    query: Optional[str] = None,
     **kwargs,
 ) -> BaseRetriever:
     """
@@ -51,6 +66,8 @@ def create_retriever(
         k: 返回的文档数量，默认使用配置值
         score_threshold: 相似度阈值（仅用于 similarity_score_threshold）
         fetch_k: MMR 候选文档数量（仅用于 mmr）
+        auto_select: 是否自动选择策略（需要提供 query）
+        query: 用户查询（仅在 auto_select=True 时需要）
         **kwargs: 其他参数
         
     Returns:
@@ -63,8 +80,15 @@ def create_retriever(
         >>> embeddings = get_embeddings()
         >>> vector_store = load_vector_store("data/indexes/my_docs", embeddings)
         >>> 
-        >>> # 创建相似度检索器
+        >>> # 方式一：手动指定策略
         >>> retriever = create_retriever(vector_store, search_type="similarity", k=4)
+        >>> 
+        >>> # 方式二：自动选择策略（推荐）
+        >>> retriever = create_retriever(
+        ...     vector_store,
+        ...     auto_select=True,
+        ...     query="介绍一下机器学习"
+        ... )
         >>> 
         >>> # 创建 MMR 检索器（更多样化的结果）
         >>> retriever = create_retriever(
@@ -86,6 +110,16 @@ def create_retriever(
         >>> for doc in docs:
         ...     print(doc.page_content[:100])
     """
+    # 自动选择策略
+    if auto_select:
+        if query is None:
+            logger.warning("auto_select=True 但未提供 query，使用默认策略")
+        else:
+            selector = get_strategy_selector()
+            selected_strategy = selector.select_strategy(query)
+            search_type = selected_strategy.value
+            logger.info(f"自动选择策略: {search_type}")
+    
     # 使用配置中的默认值
     search_type = search_type or settings.retriever_search_type
     k = k or settings.retriever_k

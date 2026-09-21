@@ -1,0 +1,4 @@
+# file: /home/tianzuolin/learn/agent/lc-studylab/backend/core/models.py
+# hypothesis_version: 6.131.25
+
+[0.0, 0.3, 0.7, 1.0, ', ', '__main__', 'api_key', 'base_url', 'creative', 'default', 'description', 'fast', 'gpt-4o', 'gpt-4o-mini', 'max_tokens', 'model', 'model_name', 'openai', 'precise', 'streaming', 'temperature', '创意模型，适合需要创造性的任务', '快速模型，适合简单任务', '精确模型，适合需要准确性的任务', '默认模型，平衡性能和成本']

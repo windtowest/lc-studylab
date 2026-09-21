@@ -15,7 +15,7 @@ sentence-transformers==5.1.2
 
 # LangGraph - 用于构建复杂工作流
 langgraph==1.0.2
-langgraph-checkpoint-sqlite==3.0.0  # SQLite 检查点支持
+# langgraph-checkpoint-sqlite==3.0.0  # SQLite 检查点支持
 langgraph-checkpoint-postgres==2.0.11  # PostgreSQL 检查点支持
 psycopg[binary]==3.3.2  # PostgreSQL 驱动
 
@@ -67,4 +67,29 @@ aiofiles==24.1.0                # 异步文件操作
 # CLI 工具
 click==8.1.8                    # 命令行接口框架
 rich==13.9.4                    # 终端美化输出
+
+# ==================== Self-Reward & Critic 模块依赖 ====================
+# 属性测试框架
+hypothesis==6.131.25            # Property-Based Testing 框架
+# psycopg2-binary 已通过 psycopg[binary] 提供
+
+# ==================== Agentic RL (Agent-Lightning + VeRL + GRPO) ====================
+# Agent-Lightning - 微软 Agentic RL 框架
+agentlightning>=0.1.0           # Agent-Lightning 核心包
+
+# VeRL - 字节跳动 LLM RL 训练引擎
+verl>=0.3.0                     # VeRL 核心包 (支持 GRPO, PPO 等算法)
+
+# Ray - 分布式计算框架 (VeRL 核心依赖)
+ray[default]>=2.9.0             # Ray 核心 + Dashboard
+
+# DeepSpeed - 分布式训练优化
+deepspeed>=0.14.0               # DeepSpeed ZeRO 优化
+
+# PyTorch 相关 (VeRL 依赖)
+torch>=2.1.0                    # PyTorch 核心
+accelerate>=0.25.0              # HuggingFace Accelerate
+
+# vLLM - 高效推理引擎 (VeRL 推荐)
+vllm>=0.8.2                     # vLLM 推理引擎
 
